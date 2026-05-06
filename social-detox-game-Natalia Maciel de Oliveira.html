@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Detox Mini Game</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #fff0f3 0%, #fffbeb 50%, #fff0f3 100%);
+      min-height: 100vh;
+      color: #7a2d3e;
+      padding-top: 54px;
+    }
+
+    /* ── Student Header ─────────────────────────── */
+    #student-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: linear-gradient(90deg, #f8bbd0, #fff9c4, #f8bbd0);
+      border-bottom: 2px solid #f48fb1;
+      padding: 7px 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(200,80,100,0.15);
+    }
+    #student-header .sh-name {
+      font-size: .82rem;
+      font-weight: 800;
+      color: #c2185b;
+      letter-spacing: .01em;
+      line-height: 1.4;
+    }
+    #student-header .sh-info {
+      font-size: .72rem;
+      font-weight: 600;
+      color: #e57399;
+    }
+
+    /* ── Utilities ─────────────────────────────── */
+    .hidden { display: none !important; }
+    .screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+    .card { background: rgba(255,255,255,0.8); border: 1.5px solid #f9c8d4; border-radius: 20px; padding: 20px; box-shadow: 0 4px 16px rgba(200,80,100,0.10); }
+    .btn {
+      display: block; width: 100%; padding: 16px 24px;
+      border: none; border-radius: 16px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: transform .15s, box-shadow .15s;
+      text-align: center;
+    }
+    .btn:hover { transform: scale(1.02); box-shadow: 0 6px 18px rgba(200,80,100,0.20); }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: linear-gradient(135deg, #f48fb1, #e57399); color: #fff; }
+    .btn-yellow  { background: linear-gradient(135deg, #ffe082, #ffc947); color: #7a4a00; }
+    .btn-ghost   { background: rgba(255,255,255,0.7); border: 1.5px solid #f9c8d4; color: #c26380; }
+    .back-btn {
+      background: none; border: none; color: #f4a0b5; cursor: pointer;
+      font-size: .9rem; margin-bottom: 20px; padding: 0; display: inline-block;
+    }
+    .back-btn:hover { color: #e57399; }
+    .score-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.7); border: 1.5px solid #f9c8d4;
+      border-radius: 99px; padding: 6px 16px; font-size: .88rem;
+      font-weight: 700; color: #c26380;
+    }
+    .tip-box {
+      background: #fffbeb; border: 1.5px solid #ffe082; border-radius: 16px;
+      padding: 14px 16px; font-size: .85rem; color: #7a5500; line-height: 1.5;
+    }
+    .progress-bar { height: 8px; background: #fce4ec; border-radius: 99px; overflow: hidden; margin-bottom: 20px; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg,#f48fb1,#e57399); border-radius: 99px; transition: width .4s; }
+
+    /* ── Animations ────────────────────────────── */
+    @keyframes float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes pop     { 0%{transform:scale(.3);opacity:0} 60%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+    @keyframes slideUp { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
+    @keyframes shake   { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)} }
+    @keyframes glow    { 0%,100%{box-shadow:0 0 0 0 rgba(244,143,177,.45)} 50%{box-shadow:0 0 0 12px rgba(244,143,177,0)} }
+
+    .float   { animation: float 3s ease-in-out infinite; }
+    .pop     { animation: pop   .45s cubic-bezier(.36,.07,.19,.97) both; }
+    .slideUp { animation: slideUp .35s ease-out both; }
+    .shake   { animation: shake .4s ease-in-out; }
+    .glow    { animation: glow  2s ease-in-out infinite; }
+
+    /* ── Start Screen ──────────────────────────── */
+    #start-screen .logo {
+      width: 110px; height: 110px; background: #fff;
+      border-radius: 28px; border: 2px solid #f9c8d4;
+      font-size: 54px; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px; box-shadow: 0 4px 16px rgba(200,80,100,.12);
+    }
+    #start-screen h1  { font-size: 2.4rem; font-weight: 900; color: #e57399; text-align: center; }
+    #start-screen h2  { font-size: 1.1rem; font-weight: 700; color: #f5a623; text-align: center; margin-bottom: 22px; }
+    #start-screen .facts { max-width: 340px; text-align: left; }
+    #start-screen .facts li { display: flex; gap: 10px; align-items: flex-start; font-size: .88rem; color: #c26380; margin-bottom: 8px; }
+    #start-screen .sub { text-align: center; color: #f4a0b5; font-size: .88rem; margin-bottom: 22px; }
+
+    /* ── Menu Screen ───────────────────────────── */
+    #menu-screen { justify-content: flex-start; padding-top: 40px; }
+    #menu-screen h1 { font-size: 1.8rem; font-weight: 900; color: #e57399; }
+    #menu-screen p  { color: #f4a0b5; font-size: .88rem; margin-bottom: 8px; }
+    .game-card {
+      width: 100%; max-width: 440px;
+      border: 2px solid; border-radius: 20px; padding: 18px 20px;
+      display: flex; align-items: center; gap: 16px; cursor: pointer;
+      transition: transform .15s, box-shadow .15s; text-align: left;
+      background: none; font-family: inherit;
+    }
+    .game-card:hover { transform: scale(1.02); box-shadow: 0 8px 24px rgba(200,80,100,.18); }
+    .game-card:active { transform: scale(.97); }
+    .game-card.pink   { background: linear-gradient(135deg,#fce4ec,#f8bbd0); border-color: #f48fb1; }
+    .game-card.yellow { background: linear-gradient(135deg,#fffde7,#fff9c4); border-color: #ffe082; }
+    .game-card.rose   { background: linear-gradient(135deg,#fce4ec,#f3e5f5); border-color: #f48fb1; }
+    .game-card .icon  { width: 56px; height: 56px; background: rgba(255,255,255,.6); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(200,80,100,.10); }
+    .game-card .gtitle { font-size: 1rem; font-weight: 800; color: #c2185b; }
+    .game-card .gdesc  { font-size: .8rem; color: #e57399; margin-top: 2px; }
+
+    /* ── Quiz ──────────────────────────────────── */
+    #quiz-screen  { justify-content: flex-start; padding-top: 32px; }
+    .quiz-q-card  { max-width: 480px; width: 100%; margin-bottom: 16px; }
+    .quiz-q-card .qemoji { font-size: 2.5rem; text-align: center; margin-bottom: 10px; }
+    .quiz-q-card .qtext  { font-size: 1rem; font-weight: 700; text-align: center; color: #c26380; line-height: 1.45; }
+    .quiz-options { max-width: 480px; width: 100%; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+    .quiz-option {
+      width: 100%; border: 2px solid #f9c8d4; border-radius: 16px;
+      padding: 14px 16px; background: rgba(255,255,255,.7); cursor: pointer;
+      display: flex; align-items: center; gap: 12px; font-size: .93rem;
+      font-weight: 600; color: #c26380; transition: all .15s; font-family: inherit;
+      text-align: left;
+    }
+    .quiz-option:hover:not([disabled]) { background: #fce4ec; border-color: #f48fb1; transform: scale(1.01); }
+    .quiz-option .opt-letter { width: 28px; height: 28px; border-radius: 50%; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 800; flex-shrink: 0; }
+    .quiz-option.correct  { background: #e8f5e9; border-color: #66bb6a; color: #2e7d32; }
+    .quiz-option.wrong    { background: #ffebee; border-color: #ef9a9a; color: #c62828; }
+    .quiz-option.dim      { opacity: .45; background: rgba(255,255,255,.3); border-color: #fce4ec; cursor: default; }
+    .explain-box { max-width: 480px; width: 100%; }
+
+    /* ── Click Frenzy ──────────────────────────── */
+    #frenzy-screen { justify-content: flex-start; padding: 0; }
+    #frenzy-intro  { padding: 24px; }
+    .frenzy-hud {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,.7); backdrop-filter: blur(6px);
+      border-bottom: 1.5px solid #fce4ec; padding: 10px 20px;
+      box-shadow: 0 2px 8px rgba(200,80,100,.08);
+    }
+    .frenzy-hud .score-val { font-size: 1.3rem; font-weight: 900; color: #e57399; }
+    .frenzy-hud .timer     { font-size: 1.4rem; font-weight: 900; color: #e57399; text-align: center; }
+    .timer-bar { width: 64px; height: 6px; background: #fce4ec; border-radius: 99px; overflow: hidden; margin: 2px auto 0; }
+    .timer-fill { height: 100%; background: linear-gradient(90deg,#66bb6a,#43a047); border-radius: 99px; transition: width 1s linear; }
+    .timer-fill.danger { background: linear-gradient(90deg,#ef5350,#c62828); }
+    #frenzy-area { flex: 1; position: relative; overflow: hidden; width: 100%; }
+    .notif-btn {
+      position: absolute; border: 2px solid; border-radius: 16px;
+      padding: 8px 6px; width: 80px; text-align: center; cursor: pointer;
+      font-size: .7rem; font-weight: 700; transition: transform .1s;
+      font-family: inherit; animation: slideUp .25s ease-out;
+    }
+    .notif-btn .nem { font-size: 1.6rem; display: block; margin-bottom: 2px; }
+    .notif-btn.good { background: #e8f5e9; border-color: #66bb6a; color: #2e7d32; }
+    .notif-btn.bad  { background: #fce4ec; border-color: #f48fb1; color: #c2185b; }
+    .notif-btn:hover { transform: scale(1.12); }
+    .notif-btn:active{ transform: scale(.93); }
+    .frenzy-feedback {
+      text-align: center; padding: 4px; font-size: .85rem; font-weight: 800;
+      min-height: 24px;
+    }
+    .frenzy-feedback.good { color: #2e7d32; background: #f1f8e9; }
+    .frenzy-feedback.bad  { color: #c62828; background: #ffebee; }
+
+    /* ── Memory ────────────────────────────────── */
+    #memory-screen { justify-content: flex-start; padding-top: 0; }
+    #memory-intro  { padding: 24px; }
+    .memory-hud {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,.7); border-bottom: 1.5px solid #fce4ec;
+      padding: 10px 20px; box-shadow: 0 2px 8px rgba(200,80,100,.08);
+    }
+    #memory-grid {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      gap: 10px; padding: 16px; max-width: 420px; width: 100%;
+    }
+    .mem-card {
+      aspect-ratio: 1; border-radius: 14px; border: 2px solid #f9c8d4;
+      background: rgba(255,255,255,.8); cursor: pointer; display: flex;
+      flex-direction: column; align-items: center; justify-content: center;
+      font-size: .6rem; font-weight: 700; transition: transform .15s, border-color .2s;
+      user-select: none;
+    }
+    .mem-card:hover:not(.flipped):not(.matched) { transform: scale(1.06); border-color: #f48fb1; }
+    .mem-card .back-face { font-size: 1.5rem; color: #f9c8d4; }
+    .mem-card .front-face { text-align: center; padding: 4px 2px; display: none; flex-direction: column; align-items: center; gap: 2px; }
+    .mem-card .front-face .fem { font-size: 1.5rem; }
+    .mem-card.flipped .back-face { display: none; }
+    .mem-card.flipped .front-face { display: flex; }
+    .mem-card.matched .back-face { display: none; }
+    .mem-card.matched .front-face { display: flex; }
+    .mem-card.flipped.healthy, .mem-card.matched.healthy { background: #e8f5e9; border-color: #66bb6a; color: #2e7d32; }
+    .mem-card.flipped.addictive, .mem-card.matched.addictive { background: #fce4ec; border-color: #f48fb1; color: #c2185b; }
+    .mem-card.matched { opacity: .55; transform: scale(.92); cursor: default; }
+    .memory-feedback { text-align: center; font-size: .85rem; font-weight: 800; min-height: 22px; padding: 2px; }
+
+    /* ── Result ────────────────────────────────── */
+    #result-screen .stars { display: flex; justify-content: center; gap: 12px; font-size: 2.4rem; margin-bottom: 20px; }
+    #result-screen .stars span { transition: opacity .4s, transform .4s; }
+    #result-screen .stars span.dim { opacity: .2; transform: scale(.7); }
+    #result-screen .big-score { font-size: 3rem; font-weight: 900; color: #e57399; }
+    .stat-row { display: flex; justify-content: space-between; font-size: .9rem; padding: 4px 0; }
+    .stat-row .slabel { color: #f4a0b5; }
+    .stat-row .sval   { color: #c26380; font-weight: 700; }
+
+    /* ── Top bar ───────────────────────────────── */
+    .top-bar { width: 100%; max-width: 480px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .wrapper { width: 100%; max-width: 480px; }
+
+    /* Scrollable content area */
+    #quiz-screen .inner, #memory-screen .inner { width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; }
+
+    @media (max-width: 480px) {
+      body { font-size: 15px; }
+      #memory-grid { grid-template-columns: repeat(4,1fr); gap: 7px; padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     STUDENT HEADER
+════════════════════════════════════════════ -->
+<div id="student-header">
+  <div class="sh-name">Aluna: Natalia Maciel de Oliveira</div>
+  <div class="sh-info">1ª Série EM &nbsp;·&nbsp; EEB FRANCISCO MANFROI</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     START SCREEN
+════════════════════════════════════════════ -->
+<div id="start-screen" class="screen">
+  <div class="logo float">🌸</div>
+  <h1>Social Detox</h1>
+  <h2>Mini Game</h2>
+
+  <div class="card facts" style="max-width:340px;margin-bottom:22px;">
+    <p style="font-size:.85rem;font-weight:700;color:#e57399;text-align:center;margin-bottom:10px;">Sabia que...</p>
+    <ul style="list-style:none;">
+      <li style="display:flex;gap:10px;align-items:flex-start;font-size:.85rem;color:#c26380;margin-bottom:8px;"><span>🌟</span><span>5 bilhões de pessoas usam redes sociais ativamente</span></li>
+      <li style="display:flex;gap:10px;align-items:flex-start;font-size:.85rem;color:#c26380;margin-bottom:8px;"><span>⏰</span><span>O scroll infinito foi projetado para criar dependência</span></li>
+      <li style="display:flex;gap:10px;align-items:flex-start;font-size:.85rem;color:#c26380;"><span>💭</span><span>Uso excessivo causa ansiedade, irritabilidade e isolamento</span></li>
+    </ul>
+  </div>
+
+  <p class="sub">Jogue, aprenda e faça o seu detox digital!</p>
+  <div style="max-width:340px;width:100%">
+    <button class="btn btn-primary glow" onclick="showMenu()">Começar agora!</button>
+  </div>
+  <p style="margin-top:10px;font-size:.8rem;color:#f4a0b5;">3 mini games para conscientizar</p>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MENU SCREEN
+════════════════════════════════════════════ -->
+<div id="menu-screen" class="screen hidden">
+  <div class="wrapper" style="text-align:center;margin-bottom:24px;">
+    <h1>Social Detox</h1>
+    <p>Escolha um mini game</p>
+    <div id="menu-total" class="hidden" style="margin-top:10px;">
+      <span class="score-badge">⭐ <span id="menu-total-pts">0</span> pontos acumulados</span>
+    </div>
+  </div>
+  <div class="wrapper" style="display:flex;flex-direction:column;gap:14px;">
+    <button class="game-card pink slideUp" onclick="showQuiz()" style="animation-delay:0s">
+      <div class="icon">🧠</div>
+      <div>
+        <div class="gtitle">Quiz Consciente</div>
+        <div class="gdesc">Teste seu conhecimento sobre dependência digital</div>
+      </div>
+    </button>
+    <button class="game-card yellow slideUp" onclick="showFrenzy()" style="animation-delay:.08s">
+      <div class="icon">📵</div>
+      <div>
+        <div class="gtitle">Detox Challenge</div>
+        <div class="gdesc">Resista às notificações! Clique só no que importa</div>
+      </div>
+    </button>
+    <button class="game-card rose slideUp" onclick="showMemory()" style="animation-delay:.16s">
+      <div class="icon">🃏</div>
+      <div>
+        <div class="gtitle">Memória Digital</div>
+        <div class="gdesc">Encontre os pares de hábitos saudáveis vs. viciantes</div>
+      </div>
+    </button>
+  </div>
+  <button class="btn btn-ghost" onclick="resetAll()" style="max-width:480px;margin-top:18px;font-weight:500;font-size:.9rem;">Recomeçar do zero</button>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     QUIZ SCREEN
+════════════════════════════════════════════ -->
+<div id="quiz-screen" class="screen hidden">
+  <div class="inner">
+    <div class="top-bar">
+      <button class="back-btn" onclick="showMenu()">← Voltar</button>
+      <span class="score-badge">⭐ <span id="quiz-score-display">0</span></span>
+    </div>
+    <div class="progress-bar wrapper"><div class="progress-fill" id="quiz-progress" style="width:0%"></div></div>
+    <div id="quiz-q-area" class="quiz-q-card card slideUp">
+      <div class="qemoji" id="quiz-emoji">🧠</div>
+      <div class="qtext" id="quiz-qtext"></div>
+    </div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div class="card explain-box hidden slideUp" id="quiz-explain">
+      <p style="font-size:.85rem;color:#7a5500;line-height:1.5;"><span style="font-weight:800;">💡 </span><span id="quiz-explain-text"></span></p>
+    </div>
+    <div class="wrapper hidden" id="quiz-next-wrap" style="margin-top:10px;">
+      <button class="btn btn-primary" id="quiz-next-btn" onclick="quizNext()"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CLICK FRENZY SCREEN
+════════════════════════════════════════════ -->
+<div id="frenzy-screen" class="screen hidden" style="padding:0;justify-content:flex-start;">
+  <!-- Intro -->
+  <div id="frenzy-intro" class="screen" style="min-height:auto;padding:24px;">
+    <div class="wrapper">
+      <button class="back-btn" onclick="showMenu()">← Voltar</button>
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:3.5rem;margin-bottom:10px;" class="float">📵</div>
+        <h2 style="font-size:1.5rem;font-weight:900;color:#e57399;margin-bottom:6px;">Detox Challenge</h2>
+        <p style="font-size:.88rem;color:#c26380;line-height:1.55;">
+          Clique apenas nos hábitos <strong style="color:#2e7d32;">SAUDÁVEIS</strong>.
+          Ignore as notificações viciosas!<br>Cada acerto <strong style="color:#2e7d32;">+5 pts</strong>, cada erro <strong style="color:#c62828;">-2 pts</strong>.
+        </p>
+      </div>
+      <div class="card" style="margin-bottom:20px;">
+        <p style="font-size:.82rem;font-weight:700;color:#4caf50;margin-bottom:8px;">✅ Clique em:</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;" id="good-preview"></div>
+        <p style="font-size:.82rem;font-weight:700;color:#e57399;margin-bottom:8px;">❌ Ignore:</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;" id="bad-preview"></div>
+      </div>
+      <button class="btn btn-yellow" onclick="startFrenzy()">Começar (30s)</button>
+    </div>
+  </div>
+  <!-- Game -->
+  <div id="frenzy-game" class="hidden" style="display:flex;flex-direction:column;min-height:100vh;width:100%;">
+    <div class="frenzy-hud">
+      <div style="display:flex;align-items:center;gap:6px;"><span>⭐</span><span class="score-val" id="frenzy-score">0</span></div>
+      <div>
+        <div class="timer" id="frenzy-timer">30</div>
+        <div class="timer-bar"><div class="timer-fill" id="frenzy-timer-fill" style="width:100%"></div></div>
+      </div>
+      <div style="font-size:.9rem;color:#ef9a9a;">❌ <span id="frenzy-mistakes">0</span></div>
+    </div>
+    <div class="frenzy-feedback" id="frenzy-feedback"></div>
+    <div id="frenzy-area" style="flex:1;position:relative;overflow:hidden;"></div>
+  </div>
+  <!-- Done -->
+  <div id="frenzy-done" class="screen hidden">
+    <div class="wrapper" style="text-align:center;">
+      <div style="font-size:3.5rem;margin-bottom:10px;" id="frenzy-trophy">🌸</div>
+      <h2 style="font-size:1.5rem;font-weight:900;color:#e57399;margin-bottom:4px;">Tempo esgotado!</h2>
+      <p style="font-size:.88rem;color:#f4a0b5;margin-bottom:20px;">Veja como foi sua resistência digital:</p>
+      <div class="card" style="margin-bottom:16px;">
+        <div style="text-align:center;margin-bottom:12px;">
+          <div style="font-size:2.5rem;font-weight:900;color:#e57399;" id="frenzy-final-score">0</div>
+          <div style="font-size:.8rem;color:#f4a0b5;">pontos</div>
+        </div>
+        <div class="stat-row"><span class="slabel">Erros</span><span class="sval" id="frenzy-final-mistakes">0</span></div>
+        <div class="stat-row"><span class="slabel">Taxa de foco</span><span class="sval" id="frenzy-accuracy">0%</span></div>
+      </div>
+      <div class="tip-box" style="margin-bottom:20px;" id="frenzy-msg"></div>
+      <button class="btn btn-primary" onclick="finishFrenzy()">Ver resultado</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MEMORY SCREEN
+════════════════════════════════════════════ -->
+<div id="memory-screen" class="screen hidden" style="padding:0;justify-content:flex-start;align-items:center;">
+  <!-- Intro -->
+  <div id="memory-intro" class="screen" style="min-height:auto;padding:24px;">
+    <div class="wrapper">
+      <button class="back-btn" onclick="showMenu()">← Voltar</button>
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:3.5rem;margin-bottom:10px;" class="float">🃏</div>
+        <h2 style="font-size:1.5rem;font-weight:900;color:#e57399;margin-bottom:6px;">Memória Digital</h2>
+        <p style="font-size:.88rem;color:#c26380;line-height:1.55;">
+          Encontre os pares de cartas iguais! Hábitos
+          <span style="color:#2e7d32;font-weight:700;">saudáveis</span> e
+          <span style="color:#c2185b;font-weight:700;">viciantes</span>.
+          Cada par correto vale <strong>15 pontos</strong>!
+        </p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+        <div class="card" style="border-color:#a5d6a7;background:#f1f8e9;text-align:center;">
+          <div style="font-size:1.6rem;margin-bottom:4px;">📚🧘🌳🎨</div>
+          <div style="font-size:.78rem;font-weight:700;color:#2e7d32;">Hábitos saudáveis</div>
+        </div>
+        <div class="card" style="border-color:#f48fb1;background:#fce4ec;text-align:center;">
+          <div style="font-size:1.6rem;margin-bottom:4px;">📱🔔❤️🎰</div>
+          <div style="font-size:.78rem;font-weight:700;color:#c2185b;">Armadilhas digitais</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="startMemory()">Começar o jogo</button>
+    </div>
+  </div>
+  <!-- Game -->
+  <div id="memory-game" class="hidden" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+    <div class="memory-hud">
+      <button class="back-btn" style="margin:0;" onclick="showMemoryIntro()">← Voltar</button>
+      <div style="text-align:center;">
+        <div style="font-size:.7rem;color:#f4a0b5;">Pares</div>
+        <div style="font-weight:800;color:#e57399;" id="mem-matches">0/8</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;"><span>⭐</span><span style="font-weight:800;color:#e57399;" id="mem-score">0</span></div>
+    </div>
+    <div class="memory-feedback" id="mem-feedback"></div>
+    <div id="memory-grid"></div>
+    <div style="font-size:.78rem;color:#f4a0b5;padding-bottom:12px;">Movimentos: <span id="mem-moves">0</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     RESULT SCREEN
+════════════════════════════════════════════ -->
+<div id="result-screen" class="screen hidden">
+  <div class="wrapper" style="text-align:center;">
+    <div style="font-size:3.5rem;margin-bottom:12px;" id="result-emoji" class="float">🏆</div>
+    <h2 style="font-size:1.7rem;font-weight:900;color:#e57399;margin-bottom:2px;">Resultado!</h2>
+    <p style="font-weight:800;font-size:1.1rem;margin-bottom:16px;" id="result-level-label">Mestre do Detox</p>
+    <div class="stars" id="result-stars">
+      <span>⭐</span><span>⭐</span><span>⭐</span>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="big-score" id="result-total">0</div>
+      <div style="font-size:.8rem;color:#f4a0b5;margin-bottom:14px;">pontos acumulados</div>
+      <div class="stat-row"><span class="slabel">Último jogo</span><span class="sval" id="result-last-game">—</span></div>
+      <div class="stat-row"><span class="slabel">Pontos no último</span><span class="sval" id="result-last-score">+0</span></div>
+      <div class="stat-row"><span class="slabel">Games jogados</span><span class="sval" id="result-games-played">0</span></div>
+    </div>
+    <div class="tip-box" style="margin-bottom:20px;"><strong>💡 Dica do dia:</strong> <span id="result-tip"></span></div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn btn-primary" onclick="showMenu()">Jogar outro mini game</button>
+      <button class="btn btn-ghost" onclick="resetAll()">Recomeçar do início</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════ */
+var state = { totalScore: 0, gamesPlayed: 0, lastGame: '', lastScore: 0 };
+
+/* ════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════ */
+var screens = ['start-screen','menu-screen','quiz-screen','frenzy-screen','memory-screen','result-screen'];
+
+function showScreen(id) {
+  screens.forEach(function(s){ document.getElementById(s).classList.add('hidden'); });
+  document.getElementById(id).classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+
+function showMenu() {
+  stopFrenzy();
+  updateMenuTotal();
+  showScreen('menu-screen');
+}
+
+function updateMenuTotal() {
+  var el = document.getElementById('menu-total');
+  if (state.gamesPlayed > 0) {
+    el.classList.remove('hidden');
+    document.getElementById('menu-total-pts').textContent = state.totalScore;
+  }
+}
+
+function resetAll() {
+  state = { totalScore:0, gamesPlayed:0, lastGame:'', lastScore:0 };
+  document.getElementById('menu-total').classList.add('hidden');
+  showScreen('start-screen');
+}
+
+function showStart() { showScreen('start-screen'); }
+
+/* ════════════════════════════════════════════
+   QUIZ
+════════════════════════════════════════════ */
+var QUIZ = [
+  {
+    q: "O que o 'scroll infinito' foi projetado para fazer?",
+    opts: ["Facilitar a leitura de conteúdo","Criar dependência e manter o usuário na plataforma","Organizar melhor o feed","Economizar bateria do celular"],
+    a: 1,
+    exp: "O scroll infinito foi criado para eliminar o 'ponto de parada natural', mantendo você rolando sem perceber o tempo que passa."
+  },
+  {
+    q: "Quantos usuários ativos as redes sociais possuem no mundo?",
+    opts: ["1 bilhão","2 bilhões","3 bilhões","5 bilhões"],
+    a: 3,
+    exp: "São cerca de 5 bilhões de usuários ativos! Isso é mais de 60% da população mundial."
+  },
+  {
+    q: "Qual órgão reconheceu o vício em videogames como doença?",
+    opts: ["ONU","União Europeia","OMS (Organização Mundial da Saúde)","UNESCO"],
+    a: 2,
+    exp: "A OMS catalogou o vício em videogames como doença, assim como pode ocorrer com redes sociais."
+  },
+  {
+    q: "Qual destes NÃO é um sintoma da dependência de redes sociais?",
+    opts: ["Ansiedade ao ficar sem celular","Melhora na concentração","Irritabilidade","Isolamento social"],
+    a: 1,
+    exp: "A dependência de redes sociais prejudica a concentração, não melhora. Os outros são sintomas reais do vício."
+  },
+  {
+    q: "O que a União Europeia propõe para reduzir o vício em redes?",
+    opts: ["Banir as redes sociais","Substituir o mecanismo de 'rolagem' infinita","Limitar a 1 hora por dia","Criar impostos sobre o uso"],
+    a: 1,
+    exp: "A UE quer um design ético que substitua o scroll infinito, pois ele é apontado como principal causa do vício."
+  },
+  {
+    q: "Uma forma eficaz de combater o vício em redes sociais é...",
+    opts: ["Usar mais redes sociais para 'vacinar'","Desativar notificações e estabelecer horários","Nunca usar smartphones","Seguir mais pessoas"],
+    a: 1,
+    exp: "Desativar notificações e definir horários fixos para uso é uma das estratégias mais eficazes recomendadas por especialistas."
+  }
+];
+
+var quizState = { cur: 0, score: 0, selected: null };
+
+function showQuiz() {
+  quizState = { cur: 0, score: 0, selected: null };
+  document.getElementById('quiz-score-display').textContent = '0';
+  renderQuizQuestion();
+  showScreen('quiz-screen');
+}
+
+function renderQuizQuestion() {
+  var q = QUIZ[quizState.cur];
+  var pct = (quizState.cur / QUIZ.length) * 100;
+  document.getElementById('quiz-progress').style.width = pct + '%';
+  document.getElementById('quiz-qtext').textContent = q.q;
+  document.getElementById('quiz-explain').classList.add('hidden');
+  document.getElementById('quiz-next-wrap').classList.add('hidden');
+
+  var opts = document.getElementById('quiz-options');
+  opts.innerHTML = '';
+  var letters = ['A','B','C','D'];
+  q.opts.forEach(function(opt, i) {
+    var btn = document.createElement('button');
+    btn.className = 'quiz-option slideUp';
+    btn.style.animationDelay = (i * 0.05) + 's';
+    btn.innerHTML = '<span class="opt-letter">' + letters[i] + '</span>' + opt;
+    btn.onclick = function() { quizSelect(i); };
+    opts.appendChild(btn);
+  });
+}
+
+function quizSelect(idx) {
+  if (quizState.selected !== null) return;
+  quizState.selected = idx;
+  var q = QUIZ[quizState.cur];
+  var btns = document.querySelectorAll('.quiz-option');
+  btns.forEach(function(b, i) {
+    b.disabled = true;
+    if (i === q.a) { b.classList.add('correct'); }
+    else if (i === idx && idx !== q.a) { b.classList.add('wrong'); }
+    else { b.classList.add('dim'); }
+  });
+  if (idx === q.a) {
+    quizState.score += 10;
+    document.getElementById('quiz-score-display').textContent = quizState.score;
+  }
+  document.getElementById('quiz-explain-text').textContent = q.exp;
+  document.getElementById('quiz-explain').classList.remove('hidden');
+  var nextBtn = document.getElementById('quiz-next-btn');
+  var isLast = quizState.cur === QUIZ.length - 1;
+  nextBtn.textContent = isLast ? 'Ver resultado (' + quizState.score + ' pts)' : 'Próxima pergunta →';
+  document.getElementById('quiz-next-wrap').classList.remove('hidden');
+}
+
+function quizNext() {
+  if (quizState.cur === QUIZ.length - 1) {
+    completeGame('Quiz', quizState.score);
+  } else {
+    quizState.cur++;
+    quizState.selected = null;
+    renderQuizQuestion();
+  }
+}
+
+/* ════════════════════════════════════════════
+   CLICK FRENZY
+════════════════════════════════════════════ */
+var GOOD = [
+  {e:'📚',l:'Ler livros'},{e:'🌿',l:'Caminhar'},{e:'🎨',l:'Arte'},
+  {e:'🧘',l:'Meditação'},{e:'👨‍👩‍👧',l:'Família'},{e:'🍎',l:'Comer bem'},
+  {e:'💤',l:'Dormir'},{e:'🎵',l:'Música'}
+];
+var BAD = [
+  {e:'📱',l:'Notificação'},{e:'❤️',l:'+1 curtida'},{e:'🔔',l:'Alerta!'},
+  {e:'🎰',l:'Scroll'},{e:'🤳',l:'Selfie'},{e:'📢',l:'Trending'}
+];
+
+var frenzyState = { score:0, mistakes:0, timeLeft:30, timer:null, spawnTimer:null, notifId:0 };
+
+function buildPreviews() {
+  var gp = document.getElementById('good-preview');
+  var bp = document.getElementById('bad-preview');
+  gp.innerHTML = ''; bp.innerHTML = '';
+  GOOD.slice(0,5).forEach(function(g) {
+    var s = document.createElement('span');
+    s.style.cssText = 'background:#e8f5e9;border:1px solid #a5d6a7;border-radius:99px;padding:3px 10px;font-size:.75rem;font-weight:700;color:#2e7d32;';
+    s.textContent = g.e + ' ' + g.l;
+    gp.appendChild(s);
+  });
+  BAD.slice(0,4).forEach(function(b) {
+    var s = document.createElement('span');
+    s.style.cssText = 'background:#fce4ec;border:1px solid #f48fb1;border-radius:99px;padding:3px 10px;font-size:.75rem;font-weight:700;color:#c2185b;';
+    s.textContent = b.e + ' ' + b.l;
+    bp.appendChild(s);
+  });
+}
+
+function showFrenzy() {
+  buildPreviews();
+  document.getElementById('frenzy-intro').style.display = '';
+  document.getElementById('frenzy-game').classList.add('hidden');
+  document.getElementById('frenzy-done').classList.add('hidden');
+  document.getElementById('frenzy-screen').classList.remove('hidden');
+  screens.filter(function(s){return s!=='frenzy-screen';}).forEach(function(s){ document.getElementById(s).classList.add('hidden'); });
+  window.scrollTo(0,0);
+}
+
+function startFrenzy() {
+  frenzyState = { score:0, mistakes:0, timeLeft:30, timer:null, spawnTimer:null, notifId:0 };
+  document.getElementById('frenzy-score').textContent = '0';
+  document.getElementById('frenzy-mistakes').textContent = '0';
+  document.getElementById('frenzy-timer').textContent = '30';
+  document.getElementById('frenzy-timer-fill').style.width = '100%';
+  document.getElementById('frenzy-timer-fill').classList.remove('danger');
+  document.getElementById('frenzy-area').innerHTML = '';
+  document.getElementById('frenzy-feedback').textContent = '';
+  document.getElementById('frenzy-feedback').className = 'frenzy-feedback';
+
+  document.getElementById('frenzy-intro').style.display = 'none';
+  document.getElementById('frenzy-game').classList.remove('hidden');
+  document.getElementById('frenzy-done').classList.add('hidden');
+
+  frenzyState.timer = setInterval(function() {
+    frenzyState.timeLeft--;
+    document.getElementById('frenzy-timer').textContent = frenzyState.timeLeft;
+    var pct = (frenzyState.timeLeft / 30) * 100;
+    document.getElementById('frenzy-timer-fill').style.width = pct + '%';
+    if (frenzyState.timeLeft <= 10) {
+      document.getElementById('frenzy-timer-fill').classList.add('danger');
+    }
+    if (frenzyState.timeLeft <= 0) { endFrenzy(); }
+  }, 1000);
+
+  frenzyState.spawnTimer = setInterval(spawnNotif, 900);
+  spawnNotif();
+}
+
+function spawnNotif() {
+  var area = document.getElementById('frenzy-area');
+  if (!area) return;
+  var isGood = Math.random() > 0.5;
+  var pool = isGood ? GOOD : BAD;
+  var item = pool[Math.floor(Math.random() * pool.length)];
+  var aW = area.offsetWidth || 300;
+  var aH = area.offsetHeight || 400;
+  var x = Math.random() * (aW - 90);
+  var y = Math.random() * (aH - 90);
+  var id = frenzyState.notifId++;
+
+  var btn = document.createElement('button');
+  btn.className = 'notif-btn ' + (isGood ? 'good' : 'bad');
+  btn.style.left = x + 'px';
+  btn.style.top  = y + 'px';
+  btn.id = 'notif-' + id;
+  btn.innerHTML = '<span class="nem">' + item.e + '</span>' + item.l;
+  btn.onclick = function() { clickNotif(id, isGood); };
+  area.appendChild(btn);
+
+  setTimeout(function() {
+    var el = document.getElementById('notif-' + id);
+    if (el) el.remove();
+  }, 2600);
+}
+
+function clickNotif(id, isGood) {
+  var el = document.getElementById('notif-' + id);
+  if (el) el.remove();
+  var fb = document.getElementById('frenzy-feedback');
+  if (isGood) {
+    frenzyState.score = Math.max(0, frenzyState.score + 5);
+    fb.textContent = '+5 ótima escolha!';
+    fb.className = 'frenzy-feedback good';
+  } else {
+    frenzyState.mistakes++;
+    frenzyState.score = Math.max(0, frenzyState.score - 2);
+    fb.textContent = '-2 resistência falhou!';
+    fb.className = 'frenzy-feedback bad';
+  }
+  document.getElementById('frenzy-score').textContent = frenzyState.score;
+  document.getElementById('frenzy-mistakes').textContent = frenzyState.mistakes;
+  setTimeout(function(){ fb.textContent = ''; fb.className = 'frenzy-feedback'; }, 800);
+}
+
+function stopFrenzy() {
+  if (frenzyState.timer) { clearInterval(frenzyState.timer); frenzyState.timer = null; }
+  if (frenzyState.spawnTimer) { clearInterval(frenzyState.spawnTimer); frenzyState.spawnTimer = null; }
+}
+
+function endFrenzy() {
+  stopFrenzy();
+  var s = frenzyState.score;
+  var m = frenzyState.mistakes;
+  var accuracy = Math.round((s / Math.max(s + m * 2, 1)) * 100);
+  document.getElementById('frenzy-final-score').textContent = s;
+  document.getElementById('frenzy-final-mistakes').textContent = m;
+  document.getElementById('frenzy-accuracy').textContent = accuracy + '%';
+  var trophy = s >= 30 ? '🏆' : s >= 15 ? '🌸' : '💪';
+  document.getElementById('frenzy-trophy').textContent = trophy;
+  var msg = m === 0
+    ? 'Perfeito! Você tem controle total sobre suas escolhas digitais!'
+    : m <= 3
+    ? 'Muito bom! Com prática, a resistência digital fica mais fácil.'
+    : 'Continuar praticando ajuda a identificar armadilhas do vício digital.';
+  document.getElementById('frenzy-msg').innerHTML = '<strong>💡</strong> ' + msg;
+  document.getElementById('frenzy-game').classList.add('hidden');
+  document.getElementById('frenzy-done').classList.remove('hidden');
+}
+
+function finishFrenzy() {
+  completeGame('Detox Challenge', frenzyState.score);
+}
+
+/* ════════════════════════════════════════════
+   MEMORY GAME
+════════════════════════════════════════════ */
+var MEM_PAIRS = [
+  {id:1, e:'📚', l:'Ler livros',      t:'healthy'},
+  {id:2, e:'🔔', l:'Notificações',    t:'addictive'},
+  {id:3, e:'🧘', l:'Meditação',       t:'healthy'},
+  {id:4, e:'📱', l:'Scroll infinito', t:'addictive'},
+  {id:5, e:'🌳', l:'Natureza',        t:'healthy'},
+  {id:6, e:'❤️', l:'Curtidas',        t:'addictive'},
+  {id:7, e:'🎨', l:'Criatividade',    t:'healthy'},
+  {id:8, e:'🎰', l:'Feed viciante',   t:'addictive'},
+];
+
+var memState = { cards:[], flipped:[], matches:0, moves:0, score:0, locked:false };
+
+function shuffle(arr) { return arr.slice().sort(function(){ return Math.random()-.5; }); }
+
+function showMemory() {
+  document.getElementById('memory-intro').style.display = '';
+  document.getElementById('memory-game').classList.add('hidden');
+  document.getElementById('memory-screen').classList.remove('hidden');
+  screens.filter(function(s){return s!=='memory-screen';}).forEach(function(s){ document.getElementById(s).classList.add('hidden'); });
+  window.scrollTo(0,0);
+}
+
+function showMemoryIntro() {
+  document.getElementById('memory-intro').style.display = '';
+  document.getElementById('memory-game').classList.add('hidden');
+}
+
+function startMemory() {
+  var cards = [];
+  MEM_PAIRS.forEach(function(p) {
+    cards.push({uid: p.id*2-1, pairId: p.id, e: p.e, l: p.l, t: p.t, flipped:false, matched:false});
+    cards.push({uid: p.id*2,   pairId: p.id, e: p.e, l: p.l, t: p.t, flipped:false, matched:false});
+  });
+  memState = { cards: shuffle(cards), flipped:[], matches:0, moves:0, score:0, locked:false };
+
+  document.getElementById('mem-matches').textContent = '0/' + MEM_PAIRS.length;
+  document.getElementById('mem-score').textContent = '0';
+  document.getElementById('mem-moves').textContent = '0';
+  document.getElementById('mem-feedback').textContent = '';
+
+  document.getElementById('memory-intro').style.display = 'none';
+  document.getElementById('memory-game').classList.remove('hidden');
+  renderMemoryGrid();
+}
+
+function renderMemoryGrid() {
+  var grid = document.getElementById('memory-grid');
+  grid.innerHTML = '';
+  memState.cards.forEach(function(card) {
+    var el = document.createElement('div');
+    el.className = 'mem-card' + (card.flipped ? ' flipped' : '') + (card.matched ? ' matched' : '') + ' ' + (card.flipped || card.matched ? card.t : '');
+    el.innerHTML = '<span class="back-face">🌸</span><div class="front-face"><span class="fem">' + card.e + '</span><span>' + card.l + '</span></div>';
+    if (!card.matched) {
+      el.onclick = (function(c){ return function(){ memClick(c.uid); }; })(card);
+    }
+    grid.appendChild(el);
+  });
+}
+
+function memClick(uid) {
+  if (memState.locked) return;
+  var card = memState.cards.find(function(c){ return c.uid === uid; });
+  if (!card || card.flipped || card.matched) return;
+  if (memState.flipped.length === 1 && memState.flipped[0] === uid) return;
+
+  card.flipped = true;
+  memState.flipped.push(uid);
+  renderMemoryGrid();
+
+  if (memState.flipped.length === 2) {
+    memState.moves++;
+    document.getElementById('mem-moves').textContent = memState.moves;
+    memState.locked = true;
+    var uid1 = memState.flipped[0], uid2 = memState.flipped[1];
+    var c1 = memState.cards.find(function(c){ return c.uid===uid1; });
+    var c2 = memState.cards.find(function(c){ return c.uid===uid2; });
+
+    if (c1.pairId === c2.pairId) {
+      setTimeout(function() {
+        c1.matched = true; c2.matched = true;
+        c1.flipped = true; c2.flipped = true;
+        memState.score += 15;
+        memState.matches++;
+        memState.flipped = [];
+        memState.locked = false;
+        document.getElementById('mem-score').textContent = memState.score;
+        document.getElementById('mem-matches').textContent = memState.matches + '/' + MEM_PAIRS.length;
+        var fb = document.getElementById('mem-feedback');
+        fb.textContent = '+15 Par encontrado!';
+        fb.style.color = '#2e7d32'; fb.style.background = '#f1f8e9';
+        setTimeout(function(){ fb.textContent = ''; fb.style.background = ''; }, 1000);
+        renderMemoryGrid();
+        if (memState.matches === MEM_PAIRS.length) {
+          setTimeout(showMemoryResult, 600);
+        }
+      }, 600);
+    } else {
+      setTimeout(function() {
+        c1.flipped = false; c2.flipped = false;
+        memState.flipped = [];
+        memState.locked = false;
+        var fb = document.getElementById('mem-feedback');
+        fb.textContent = 'Tente novamente!';
+        fb.style.color = '#c26380'; fb.style.background = '#fce4ec';
+        setTimeout(function(){ fb.textContent = ''; fb.style.background = ''; }, 800);
+        renderMemoryGrid();
+      }, 900);
+    }
+  }
+}
+
+function showMemoryResult() {
+  completeGame('Memória Digital', memState.score);
+}
+
+/* ════════════════════════════════════════════
+   RESULT
+════════════════════════════════════════════ */
+var TIPS = [
+  "Desative as notificações de redes sociais durante o trabalho e estudos.",
+  "Estabeleça horários fixos para checar suas redes sociais.",
+  "Substitua 15 minutos de scroll por uma atividade que você aprecia.",
+  "Deixe o celular fora do quarto durante o sono para dormir melhor.",
+  "Use aplicativos de controle de tempo de tela para monitorar seus hábitos.",
+  "Siga perfis que inspiram e cancele os que causam ansiedade.",
+  "Faça 'detox digital' de um dia por semana — tente um domingo offline!",
+  "Quando sentir vontade de checar o celular, respire fundo 3 vezes primeiro.",
+];
+
+function completeGame(name, score) {
+  state.totalScore += score;
+  state.gamesPlayed++;
+  state.lastGame = name;
+  state.lastScore = score;
+  showResult();
+}
+
+function showResult() {
+  var s = state.totalScore;
+  var level, emoji, color;
+  if (s >= 100) { level='Mestre do Detox';       emoji='🏆'; color='#f5a623'; }
+  else if (s >= 60)  { level='Consciente Digital';   emoji='🌸'; color='#e57399'; }
+  else if (s >= 30)  { level='Aprendiz Digital';     emoji='💪'; color='#f5a623'; }
+  else               { level='Iniciante Corajoso';   emoji='🌱'; color='#4caf50'; }
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-level-label').textContent = level;
+  document.getElementById('result-level-label').style.color = color;
+  document.getElementById('result-total').textContent = s;
+  document.getElementById('result-last-game').textContent = state.lastGame;
+  document.getElementById('result-last-score').textContent = '+' + state.lastScore;
+  document.getElementById('result-games-played').textContent = state.gamesPlayed;
+  document.getElementById('result-tip').textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
+
+  var stars = s >= 100 ? 3 : s >= 50 ? 2 : 1;
+  var starEls = document.querySelectorAll('#result-stars span');
+  starEls.forEach(function(el, i){ el.classList.toggle('dim', i >= stars); });
+
+  showScreen('result-screen');
+}
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+  showScreen('start-screen');
+});
+</script>
+</body>
+</html>

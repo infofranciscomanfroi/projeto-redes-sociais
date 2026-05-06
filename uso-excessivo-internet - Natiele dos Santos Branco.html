@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O Uso Excessivo da Internet</title>
+<style>
+  :root{
+    --bg:#0f172a;
+    --bg-soft:#111c34;
+    --surface:#16223d;
+    --surface-2:#1d2c4d;
+    --text:#e8edf7;
+    --text-muted:#9aa7c2;
+    --primary:#3b82f6;
+    --primary-2:#60a5fa;
+    --accent:#f59e0b;
+    --accent-2:#fbbf24;
+    --danger:#ef4444;
+    --success:#22c55e;
+    --border:rgba(255,255,255,.08);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.65}
+  a{color:var(--primary-2);text-decoration:none}
+  header{position:sticky;top:0;background:rgba(15,23,42,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);z-index:50}
+  .nav{max-width:1100px;margin:0 auto;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  .brand{font-weight:700;letter-spacing:.3px;font-size:1.05rem}
+  .nav-links{display:flex;gap:6px;flex-wrap:wrap}
+  .nav-links button{background:transparent;color:var(--text-muted);border:1px solid transparent;padding:8px 14px;border-radius:10px;cursor:pointer;font-size:.92rem;transition:all .2s}
+  .nav-links button:hover{color:var(--text);background:var(--surface)}
+  .nav-links button.active{color:var(--text);background:var(--surface-2);border-color:var(--border)}
+  main{max-width:1100px;margin:0 auto;padding:32px 22px 80px}
+  section{display:none;animation:fade .35s ease}
+  section.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.8rem,3.5vw,2.6rem);line-height:1.15;margin:0 0 18px;letter-spacing:-.02em}
+  h2{font-size:1.5rem;margin:36px 0 12px;color:var(--primary-2);letter-spacing:-.01em}
+  h3{font-size:1.15rem;margin:18px 0 8px}
+  p{color:#d6deef}
+  .hero{padding:48px 0 28px;border-bottom:1px solid var(--border);margin-bottom:24px}
+  .hero .eyebrow{color:var(--accent);font-size:.85rem;letter-spacing:.18em;text-transform:uppercase;font-weight:600;margin-bottom:14px}
+  .hero p.lead{font-size:1.15rem;color:#cdd6ec;max-width:760px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin:14px 0}
+  .card h3{margin-top:0}
+  .quote{border-left:3px solid var(--accent);background:var(--bg-soft);padding:14px 18px;margin:10px 0;border-radius:8px;color:#e6ecfb;font-style:italic}
+  .quote .author{display:block;font-style:normal;color:var(--text-muted);margin-top:6px;font-size:.88rem}
+  .grid{display:grid;gap:16px}
+  .grid-2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .grid-3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .age-card{padding:18px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px}
+  .age-card .age{color:var(--accent);font-weight:700;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase}
+  .age-card .limit{font-size:1.2rem;font-weight:600;margin-top:6px}
+  .age-card .note{color:var(--text-muted);font-size:.9rem;margin-top:6px}
+  .stat{background:linear-gradient(135deg,#1e293b,#1d2c4d);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center;margin:18px 0}
+  .stat .num{font-size:2.4rem;font-weight:700;color:var(--accent-2);letter-spacing:-.02em}
+  .stat .label{color:var(--text-muted);margin-top:4px}
+  .danger-card{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:12px;padding:18px}
+  .danger-card .num{color:var(--accent);font-weight:700;font-size:.85rem;letter-spacing:.1em}
+  .danger-card h3{margin:6px 0 8px}
+  .footer-refs{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:.88rem}
+  .footer-refs h3{color:var(--text);margin-bottom:8px}
+  .footer-refs ul{padding-left:18px;margin:0}
+  .footer-refs li{margin:4px 0}
+
+  /* QUIZ */
+  .quiz-progress{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-bottom:18px}
+  .quiz-progress .bar{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));width:0;transition:width .4s ease}
+  .quiz-question{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+  .quiz-question h3{font-size:1.25rem;margin:0 0 18px}
+  .options{display:grid;gap:10px}
+  .option{background:var(--surface-2);border:1px solid var(--border);color:var(--text);text-align:left;padding:14px 16px;border-radius:10px;cursor:pointer;font-size:.98rem;transition:all .2s}
+  .option:hover:not(:disabled){background:#243456;transform:translateX(2px)}
+  .option:disabled{cursor:default}
+  .option.correct{background:rgba(34,197,94,.15);border-color:var(--success);color:#bdf3ce}
+  .option.wrong{background:rgba(239,68,68,.15);border-color:var(--danger);color:#fac9c9}
+  .feedback{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:.95rem}
+  .feedback.ok{background:rgba(34,197,94,.12);border:1px solid var(--success);color:#cbf3d8}
+  .feedback.ko{background:rgba(239,68,68,.12);border:1px solid var(--danger);color:#facccc}
+  .quiz-actions{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px}
+  .quiz-actions .meta{color:var(--text-muted);font-size:.9rem}
+  .btn{background:var(--primary);color:#fff;border:none;padding:11px 20px;border-radius:10px;font-weight:600;cursor:pointer;font-size:.95rem;transition:all .2s}
+  .btn:hover{background:#2563eb;transform:translateY(-1px)}
+  .btn.secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border)}
+  .btn.secondary:hover{background:#243456}
+  .btn.accent{background:var(--accent);color:#1a1206}
+  .btn.accent:hover{background:var(--accent-2)}
+  .result{text-align:center;padding:40px 24px}
+  .result .score{font-size:3.4rem;font-weight:700;color:var(--accent-2);margin:8px 0}
+  .result .msg{color:var(--text-muted);max-width:520px;margin:8px auto 24px}
+
+  /* MATCHING */
+  .match-help{color:var(--text-muted);margin:0 0 18px;font-size:.95rem}
+  .match-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.match-grid{grid-template-columns:1fr}}
+  .col-title{font-size:.78rem;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;font-weight:700;margin-bottom:10px}
+  .match-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;font-size:.93rem;transition:all .2s;position:relative}
+  .match-item:hover:not(.locked){background:var(--surface-2);transform:translateX(2px)}
+  .match-item.selected{border-color:var(--primary);background:rgba(59,130,246,.12);box-shadow:0 0 0 2px rgba(59,130,246,.25)}
+  .match-item.connected{border-color:var(--accent);background:rgba(245,158,11,.08)}
+  .match-item.connected::after{content:attr(data-pair-label);display:block;margin-top:6px;font-size:.78rem;color:var(--accent);font-weight:600}
+  .match-item.right.correct{border-color:var(--success);background:rgba(34,197,94,.12)}
+  .match-item.right.wrong{border-color:var(--danger);background:rgba(239,68,68,.1)}
+  .match-item.right.wrong .reveal{display:block;margin-top:8px;font-size:.82rem;color:#bdf3ce;border-top:1px dashed var(--border);padding-top:6px}
+  .match-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .match-status{margin-top:14px;color:var(--text-muted);font-size:.92rem}
+  .match-status.ok{color:#bdf3ce}
+</style>
+</head>
+<body>
+
+<div style="background:var(--primary);color:#fff;text-align:center;padding:10px 16px;font-size:.92rem;font-weight:500">
+  Natiele dos Santos Branco &middot; 1ª Série EM &middot; EEB Francisco Manfroi
+</div>
+<header>
+  <div class="nav">
+    <div class="brand">O Uso Excessivo da Internet</div>
+    <nav class="nav-links">
+      <button data-tab="home" class="active">Início</button>
+      <button data-tab="content">Conteúdo</button>
+      <button data-tab="quiz">Quiz</button>
+      <button data-tab="ligar">Ligar</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ===================== HOME ===================== -->
+<section id="home" class="active">
+  <div class="hero">
+    <div class="eyebrow">Material educativo</div>
+    <h1>O Uso Excessivo da Internet</h1>
+    <p class="lead">Vivemos em um mundo mediado pela tecnologia. Como tudo na vida, ela tem seu lado positivo e negativo — e o uso excessivo de telas é um dos desafios mais urgentes que essa realidade nos impõe.</p>
+    <div style="display:inline-flex;flex-direction:column;gap:2px;margin-top:18px;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
+      <span style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted)">Trabalho de</span>
+      <span style="font-weight:600">Natiele dos Santos Branco</span>
+      <span style="font-size:.85rem;color:var(--text-muted)">1ª Série EM · EEB Francisco Manfroi</span>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <h3 style="color:var(--success)">Pontos positivos</h3>
+      <p>Diagnósticos médicos avançados, internet das coisas, tecnologias assistivas para pessoas com deficiência, visitas virtuais a museus em outros países sem sair de casa.</p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--accent)">Pontos negativos</h3>
+      <p>Acesso fácil a conteúdos inapropriados, aliciamento de menores, vício em tecnologia, deepweb, fuga do mundo real, cyberbullying.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <p style="margin:0">A premissa básica de sempre: <strong>o problema não é a tecnologia, mas como a usamos</strong>. Será?</p>
+  </div>
+
+  <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap">
+    <button class="btn" onclick="goTab('content')">Ler o conteúdo</button>
+    <button class="btn secondary" onclick="goTab('quiz')">Fazer o quiz</button>
+    <button class="btn secondary" onclick="goTab('ligar')">Jogo de ligar</button>
+  </div>
+</section>
+
+<!-- ===================== CONTENT ===================== -->
+<section id="content">
+  <h1>Conteúdo</h1>
+  <p>O impacto das redes sociais e do uso de computadores no desenvolvimento de crianças e adolescentes tem crescido entre profissionais de saúde mental — e não deve ser uma discussão exclusiva da área da Saúde. Educadores também precisam participar, uma vez que essa "vida conectada" tem afetado a sala de aula.</p>
+
+  <h2>O que dizem especialistas</h2>
+  <div class="quote">"As redes sociais estão dilacerando a sociedade." <span class="author">— ex-executivo do Facebook</span></div>
+  <div class="quote">"Não quero meu sobrinho nas redes sociais." <span class="author">— Tim Cook, CEO da Apple</span></div>
+  <div class="quote">"Estamos criando uma geração de alienados." <span class="author">— psicólogo do Hospital das Clínicas de São Paulo</span></div>
+  <div class="quote">"Jamais a gente deveria permitir o contato de uma criança com qualquer tipo de tecnologia antes dos 2 ou 3 anos de idade."</div>
+  <div class="quote">"Os gurus digitais criam os filhos sem telas."</div>
+  <p>O que chama atenção é que essas falas vêm de pessoas que trabalham com tecnologia ou com saúde — o que mostra o quanto o assunto é urgente.</p>
+
+  <h2>Mediação consciente do uso de telas</h2>
+  <p>É fundamental uma mediação adulta consciente. Girardello, Fantin e Pereira (2021) propõem três perguntas:</p>
+  <div class="card"><strong>1.</strong> Quanto tempo, em que idade e em que condições seria recomendável o convívio das crianças com dispositivos eletrônicos?</div>
+  <div class="card"><strong>2.</strong> Como lidar com as fake news e o quanto isso exige uma revalorização da dimensão crítica na mídia-educação?</div>
+  <div class="card"><strong>3.</strong> Qual o lugar reservado à corporeidade das crianças em uma sociedade atravessada pelo digital?</div>
+  <p>A tecnologia existe "para todos", mas nem todos têm acesso, evidenciando a necessidade de políticas públicas voltadas à inclusão digital e à alfabetização midiática (Sarmento et al., 2022).</p>
+
+  <h2>Desenvolvimento infantil e tecnologia</h2>
+  <p>Na infância, o Sistema Nervoso Central (SNC) passa por mudanças constantes, especialmente até os 2 anos de idade. As crianças aprendem observando e imitando — o ambiente é fator crucial. Brincadeiras desenvolvem aspectos motores, cognitivos, afetivos e sociais. A pandemia da Covid-19 aumentou o consumo de tecnologias e trouxe dificuldades de atenção e memória posteriores (Megiani et al., 2023).</p>
+  <p>Costa e Badaró (2021) apontam que o computador estimula o interesse, melhora a motricidade fina e é bom recurso pedagógico. Porém, o uso excessivo causa dificuldade de delimitação de regras e diminuição do convívio familiar: <em>"a dependência tecnológica pode gerar intolerância e ansiedade para adquirir informações reais de forma rápida como no mundo virtual"</em> (Costa e Badaró, 2021, p. 248). Paiva e Costa (2015) reforçam que o uso livre desconstrói o vínculo afetivo da família.</p>
+
+  <h2>Recomendações da Sociedade Brasileira de Pediatria (2024)</h2>
+  <div class="grid grid-2">
+    <div class="age-card"><div class="age">0 a 2 anos</div><div class="limit">Exposição zero</div><div class="note">Nenhum tipo de tela</div></div>
+    <div class="age-card"><div class="age">2 a 5 anos</div><div class="limit">Máx. 1 hora/dia</div><div class="note">Sempre com supervisão</div></div>
+    <div class="age-card"><div class="age">6 a 10 anos</div><div class="limit">1 a 2 horas/dia</div><div class="note">Com supervisão</div></div>
+    <div class="age-card"><div class="age">11 a 18 anos</div><div class="limit">Até 3 horas/dia</div><div class="note">Restrição ao uso noturno</div></div>
+  </div>
+
+  <div class="stat">
+    <div class="num">10h 08min</div>
+    <div class="label">Média diária de uso da internet no Brasil — 3º lugar mundial (Lima, 2024). Média global: 6h 54min.</div>
+  </div>
+
+  <h2>Impactos no cérebro e na cognição</h2>
+  <p>A exposição constante prejudica concentração, processamento de informações e memória. Estudos sugerem que o conteúdo on-line ininterrupto interfere diretamente nos processos cognitivos.</p>
+
+  <h2>Principais danos causados pelas redes sociais</h2>
+  <div class="grid grid-2">
+    <div class="danger-card"><div class="num">01</div><h3>Incentivo à compra compulsiva</h3><p>Marketplaces e anúncios constantes facilitam compras impulsivas, especialmente quando se está emocionalmente abalado.</p></div>
+    <div class="danger-card"><div class="num">02</div><h3>Necessidade de aprovação alheia</h3><p>A busca por validação social gera descontrole emocional e reflete em outras áreas da vida.</p></div>
+    <div class="danger-card"><div class="num">03</div><h3>Insatisfação com a própria vida</h3><p>Comparações com momentos editados de outros geram inadequação. OMS e APA alertam para o aumento de ansiedade, depressão e distúrbios do sono.</p></div>
+    <div class="danger-card"><div class="num">04</div><h3>Queda da atenção cerebral</h3><p>Notificações treinam o cérebro a desviar foco constantemente — mesmo com o celular fora de vista, ele é processado como ameaça iminente.</p></div>
+    <div class="danger-card"><div class="num">05</div><h3>Perda da independência do pensamento</h3><p>O "efeito manada" virtual amplifica a pressão por conformidade.</p></div>
+    <div class="danger-card"><div class="num">06</div><h3>Multiplicidade de interpretações</h3><p>Sem tom e gestos, o texto gera mal-entendidos e discussões intermináveis.</p></div>
+    <div class="danger-card"><div class="num">07</div><h3>Vício digital</h3><p>As plataformas são desenhadas para liberar dopamina via curtidas e notificações, criando dependência comportamental.</p></div>
+  </div>
+
+  <div class="footer-refs">
+    <h3>Referências</h3>
+    <ul>
+      <li>Costa & Badaró (2021)</li>
+      <li>Girardello, Fantin & Pereira (2021)</li>
+      <li>Lima (2024)</li>
+      <li>Megiani et al. (2023)</li>
+      <li>Paiva & Costa (2015)</li>
+      <li>Sarmento et al. (2022)</li>
+      <li>Sociedade Brasileira de Pediatria (2024)</li>
+    </ul>
+    <div style="margin-top:24px;padding-top:18px;border-top:1px solid var(--border)">
+      <p style="margin:0;color:var(--text);font-weight:600">Natiele dos Santos Branco</p>
+      <p style="margin:4px 0 0;color:var(--text-muted);font-size:.85rem">1ª Série EM · EEB Francisco Manfroi</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== QUIZ ===================== -->
+<section id="quiz">
+  <h1>Quiz interativo</h1>
+  <p>Teste seus conhecimentos sobre o uso excessivo da internet. São 10 perguntas com feedback imediato.</p>
+  <div id="quiz-app" style="margin-top:20px"></div>
+</section>
+
+<!-- ===================== MATCHING ===================== -->
+<section id="ligar">
+  <h1>Ligue causa &amp; consequência</h1>
+  <p class="match-help">Clique em uma causa à esquerda e depois na consequência correspondente à direita para conectá-las. Clique novamente para desfazer. Ao terminar, clique em "Verificar respostas".</p>
+  <div id="match-app"></div>
+</section>
+
+</main>
+
+<script>
+/* ============== NAVIGATION ============== */
+function goTab(id){
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-links button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelector('.nav-links button[data-tab="'+id+'"]').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.nav-links button').forEach(b=>{
+  b.addEventListener('click',()=>goTab(b.dataset.tab));
+});
+
+/* ============== QUIZ ============== */
+const QUIZ = [
+  {q:"Segundo a Sociedade Brasileira de Pediatria, qual é o tempo recomendado de tela para crianças de 0 a 2 anos?",
+   options:["Até 1 hora por dia","Exposição zero","Até 30 minutos","Apenas em fins de semana"],
+   answer:1, exp:"A SBP recomenda nenhuma exposição a telas nos primeiros 2 anos de vida."},
+  {q:"Qual a média diária de uso de internet no Brasil segundo Lima (2024)?",
+   options:["6h54min","8h30min","10h08min","12h00min"],
+   answer:2, exp:"O Brasil ocupa o 3º lugar mundial em consumo de tecnologia digital."},
+  {q:"Qual destes NÃO é apontado como dano das redes sociais?",
+   options:["Compra compulsiva","Vício digital","Aumento da empatia presencial","Insatisfação com a própria vida"],
+   answer:2, exp:"O texto aponta justamente o contrário: enfraquecimento de vínculos afetivos."},
+  {q:"Qual neurotransmissor é estimulado pelas curtidas e notificações?",
+   options:["Serotonina","Dopamina","Adrenalina","Melatonina"],
+   answer:1, exp:"As plataformas são projetadas para gerar ciclos de recompensa via dopamina."},
+  {q:"Segundo a SBP, qual o limite diário para adolescentes de 11 a 18 anos?",
+   options:["1 hora","2 horas","Até 3 horas","Sem limite"],
+   answer:2, exp:"Com restrição ao uso noturno para preservar o sono."},
+  {q:'Quem afirmou "Não quero meu sobrinho nas redes sociais"?',
+   options:["Mark Zuckerberg","Tim Cook","Elon Musk","Bill Gates"],
+   answer:1, exp:"Tim Cook, CEO da Apple."},
+  {q:'O que é o "efeito manada" no contexto digital?',
+   options:["Acesso massivo a conteúdos","Perda da independência de pensamento por pressão do grupo","Algoritmo de recomendação","Excesso de notificações"],
+   answer:1, exp:"A pressão pela aceitação no ambiente virtual reduz a originalidade de pensamento."},
+  {q:"Qual fase é especialmente crítica para o desenvolvimento do SNC?",
+   options:["Adolescência","Até os 2 anos de idade","Entre 6 e 10 anos","Vida adulta jovem"],
+   answer:1, exp:"Os primeiros dois anos concentram transformações biológicas e psicológicas fundamentais."},
+  {q:"O que a pandemia de Covid-19 trouxe relacionado ao uso de telas?",
+   options:["Redução do consumo digital","Aumento do consumo e dificuldades cognitivas posteriores","Nenhum impacto significativo","Melhora na atenção"],
+   answer:1, exp:"Megiani et al. (2023) mostram dificuldades de atenção e memória após o pico pandêmico."},
+  {q:"Qual postura é recomendada para evitar compras impulsivas online?",
+   options:["Comprar à vista","Não navegar nas redes quando o emocional está abalado","Usar apenas marketplaces grandes","Pedir opinião nas redes"],
+   answer:1, exp:"A fragilidade emocional alimenta o consumo desenfreado."}
+];
+
+let qIdx=0, qScore=0, qAnswered=false;
+function renderQuiz(){
+  const root=document.getElementById('quiz-app');
+  if(qIdx>=QUIZ.length){
+    let msg="Continue estudando — o tema merece reflexão.";
+    if(qScore>=9) msg="Excelente! Você compreende profundamente o tema.";
+    else if(qScore>=7) msg="Muito bom! Domínio sólido do conteúdo.";
+    else if(qScore>=5) msg="Você está no caminho — revise os pontos sobre desenvolvimento e danos das redes.";
+    root.innerHTML=`
+      <div class="card result">
+        <div style="color:var(--accent);letter-spacing:.18em;font-size:.78rem;font-weight:700;text-transform:uppercase">Resultado</div>
+        <div class="score">${qScore}/${QUIZ.length}</div>
+        <p class="msg">${msg}</p>
+        <button class="btn" onclick="resetQuiz()">Jogar novamente</button>
+      </div>`;
+    return;
+  }
+  const q=QUIZ[qIdx];
+  const pct=(qIdx/QUIZ.length)*100;
+  root.innerHTML=`
+    <div class="quiz-progress"><div class="bar" style="width:${pct}%"></div></div>
+    <div class="quiz-question">
+      <div style="color:var(--text-muted);font-size:.85rem;margin-bottom:8px">Pergunta ${qIdx+1} de ${QUIZ.length}</div>
+      <h3>${q.q}</h3>
+      <div class="options" id="opts">
+        ${q.options.map((o,i)=>`<button class="option" data-i="${i}">${o}</button>`).join("")}
+      </div>
+      <div id="fb"></div>
+      <div class="quiz-actions">
+        <div class="meta">Pontuação: ${qScore}</div>
+        <button class="btn" id="nextBtn" style="display:none" onclick="nextQuestion()">${qIdx===QUIZ.length-1?'Ver resultado':'Próxima pergunta'}</button>
+      </div>
+    </div>`;
+  qAnswered=false;
+  document.querySelectorAll('#opts .option').forEach(btn=>{
+    btn.addEventListener('click',()=>answerQuiz(parseInt(btn.dataset.i)));
+  });
+}
+function answerQuiz(i){
+  if(qAnswered) return;
+  qAnswered=true;
+  const q=QUIZ[qIdx];
+  const opts=document.querySelectorAll('#opts .option');
+  opts.forEach((b,idx)=>{
+    b.disabled=true;
+    if(idx===q.answer) b.classList.add('correct');
+    else if(idx===i) b.classList.add('wrong');
+  });
+  const ok=i===q.answer;
+  if(ok) qScore++;
+  document.getElementById('fb').innerHTML=
+    `<div class="feedback ${ok?'ok':'ko'}"><strong>${ok?'Correto!':'Não foi dessa vez.'}</strong> ${q.exp}</div>`;
+  document.getElementById('nextBtn').style.display='inline-block';
+}
+function nextQuestion(){ qIdx++; renderQuiz(); }
+function resetQuiz(){ qIdx=0; qScore=0; renderQuiz(); }
+renderQuiz();
+
+/* ============== MATCHING GAME ============== */
+const PAIRS = [
+  {l:"Notificações constantes do celular", r:"Queda do nível de atenção cerebral"},
+  {l:"Comparação com vidas idealizadas nas redes", r:"Insatisfação com a própria vida"},
+  {l:"Anúncios e marketplaces nas redes sociais", r:"Incentivo à compra compulsiva"},
+  {l:"Curtidas e recompensas variáveis", r:"Vício digital (liberação de dopamina)"},
+  {l:"Pressão do grupo virtual", r:"Perda da independência do pensamento"},
+  {l:"Comunicação apenas escrita sem tom de voz", r:"Multiplicidade de interpretações e discussões"},
+  {l:"Exposição excessiva antes dos 2 anos", r:"Prejuízos no desenvolvimento do SNC"},
+  {l:"Uso noturno de telas por adolescentes", r:"Distúrbios do sono"}
+];
+
+let leftItems=[], rightItems=[], connections={}, selectedLeft=null, verified=false;
+
+function shuffle(a){const x=a.slice();for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x}
+
+function initMatch(){
+  leftItems = PAIRS.map((p,i)=>({id:'L'+i, text:p.l, correctR:'R'+i}));
+  rightItems = shuffle(PAIRS.map((p,i)=>({id:'R'+i, text:p.r})));
+  connections={}; selectedLeft=null; verified=false;
+  renderMatch();
+}
+
+function renderMatch(){
+  const reverse={};
+  Object.entries(connections).forEach(([l,r])=>reverse[r]=l);
+  const labelByLeft={};
+  leftItems.forEach((it,i)=>labelByLeft[it.id]=String.fromCharCode(65+i));
+
+  const root=document.getElementById('match-app');
+  const leftHTML=leftItems.map((it,i)=>{
+    const conn=connections[it.id];
+    const cls=['match-item','left'];
+    if(selectedLeft===it.id) cls.push('selected');
+    if(conn) cls.push('connected');
+    if(verified) cls.push('locked');
+    const pairLabel=conn?`Conectado: ${rightItems.findIndex(r=>r.id===conn)+1}`:'';
+    return `<div class="${cls.join(' ')}" data-id="${it.id}" data-pair-label="${pairLabel}">
+      <strong>${labelByLeft[it.id]}.</strong> ${it.text}
+    </div>`;
+  }).join("");
+
+  const rightHTML=rightItems.map((it,i)=>{
+    const matchedLeft=reverse[it.id];
+    const cls=['match-item','right'];
+    if(matchedLeft) cls.push('connected');
+    if(verified){
+      cls.push('locked');
+      const correct = matchedLeft && leftItems.find(l=>l.id===matchedLeft).correctR===it.id;
+      if(matchedLeft) cls.push(correct?'correct':'wrong');
+    }
+    const pairLabel=matchedLeft?`Conectado: ${labelByLeft[matchedLeft]}`:'';
+    let reveal='';
+    if(verified && matchedLeft){
+      const correctL = leftItems.find(l=>l.correctR===it.id);
+      const correct = leftItems.find(l=>l.id===matchedLeft).correctR===it.id;
+      if(!correct) reveal=`<span class="reveal">Resposta correta: ${labelByLeft[correctL.id]} — ${correctL.text}</span>`;
+    } else if(verified && !matchedLeft){
+      const correctL = leftItems.find(l=>l.correctR===it.id);
+      reveal=`<span class="reveal">Resposta correta: ${labelByLeft[correctL.id]} — ${correctL.text}</span>`;
+      cls.push('wrong');
+    }
+    return `<div class="${cls.join(' ')}" data-id="${it.id}" data-pair-label="${pairLabel}">
+      <strong>${i+1}.</strong> ${it.text}${reveal}
+    </div>`;
+  }).join("");
+
+  const total=PAIRS.length;
+  const made=Object.keys(connections).length;
+  let status=`Conexões feitas: ${made} de ${total}`;
+  let statusClass='';
+  if(verified){
+    let ok=0;
+    Object.entries(connections).forEach(([l,r])=>{
+      if(leftItems.find(x=>x.id===l).correctR===r) ok++;
+    });
+    status=`Você acertou ${ok} de ${total}.`;
+    if(ok===total) statusClass='ok';
+  }
+
+  root.innerHTML=`
+    <div class="match-grid">
+      <div>
+        <div class="col-title">Causa / comportamento</div>
+        ${leftHTML}
+      </div>
+      <div>
+        <div class="col-title">Consequência</div>
+        ${rightHTML}
+      </div>
+    </div>
+    <div class="match-status ${statusClass}">${status}</div>
+    <div class="match-actions">
+      <button class="btn accent" id="verifyBtn" ${verified?'disabled':''}>Verificar respostas</button>
+      <button class="btn secondary" id="resetBtn">Embaralhar e tentar novamente</button>
+    </div>`;
+
+  if(!verified){
+    document.querySelectorAll('.match-item.left').forEach(el=>{
+      el.addEventListener('click',()=>onLeftClick(el.dataset.id));
+    });
+    document.querySelectorAll('.match-item.right').forEach(el=>{
+      el.addEventListener('click',()=>onRightClick(el.dataset.id));
+    });
+  }
+  document.getElementById('verifyBtn').addEventListener('click',verifyMatch);
+  document.getElementById('resetBtn').addEventListener('click',initMatch);
+}
+
+function onLeftClick(id){
+  if(connections[id]){ delete connections[id]; selectedLeft=null; renderMatch(); return; }
+  selectedLeft = (selectedLeft===id)?null:id;
+  renderMatch();
+}
+function onRightClick(id){
+  const reverse={};
+  Object.entries(connections).forEach(([l,r])=>reverse[r]=l);
+  if(reverse[id]){ delete connections[reverse[id]]; renderMatch(); return; }
+  if(!selectedLeft) return;
+  connections[selectedLeft]=id;
+  selectedLeft=null;
+  renderMatch();
+}
+function verifyMatch(){
+  if(Object.keys(connections).length<PAIRS.length){
+    alert('Conecte todos os pares antes de verificar.');
+    return;
+  }
+  verified=true;
+  renderMatch();
+}
+initMatch();
+</script>
+</body>
+</html>

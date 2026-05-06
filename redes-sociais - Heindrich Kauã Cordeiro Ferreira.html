@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RedeConsciente — Impactos das Redes Sociais</title>
+<style>
+  /* =========================================================
+     RESET + BASE
+     ========================================================= */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    transition: background .3s, color .3s;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+
+  /* =========================================================
+     THEME — DARK (default) + LIGHT
+     ========================================================= */
+  :root, [data-theme="dark"] {
+    --bg: #060912;
+    --bg-elev: #0c1322;
+    --fg: #eaf2ff;
+    --muted: #8a9bbd;
+    --border: rgba(255,255,255,.08);
+    --primary: #0fd0ff;
+    --primary-strong: #0ab2dd;
+    --primary-fg: #001018;
+    --primary-soft: rgba(15,208,255,.12);
+    --danger: #ff5d6c;
+    --danger-soft: rgba(255,93,108,.14);
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --card: #0e1729;
+    --card-hover: #131e36;
+    --shadow: 0 8px 30px rgba(0,0,0,.4);
+  }
+  [data-theme="light"] {
+    --bg: #f4f7fb;
+    --bg-elev: #ffffff;
+    --fg: #0a1633;
+    --muted: #5a6b89;
+    --border: rgba(10,22,51,.10);
+    --primary: #0a78d6;
+    --primary-strong: #075aa3;
+    --primary-fg: #ffffff;
+    --primary-soft: rgba(10,120,214,.10);
+    --danger: #d6245a;
+    --danger-soft: rgba(214,36,90,.10);
+    --success: #16a34a;
+    --warning: #d97706;
+    --card: #ffffff;
+    --card-hover: #f8faff;
+    --shadow: 0 4px 14px rgba(10,22,51,.08);
+  }
+
+  /* =========================================================
+     LAYOUT
+     ========================================================= */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+  section { padding: 80px 0; scroll-margin-top: 110px; }
+  section.muted { background: linear-gradient(180deg, transparent, var(--bg-elev) 30%, var(--bg-elev) 70%, transparent); }
+  h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+  h1 { font-size: clamp(2.4rem, 6vw, 4.5rem); }
+  h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 12px; }
+  h3 { font-size: 1.25rem; }
+  .lead { color: var(--muted); font-size: 1.1rem; max-width: 700px; margin: 0 auto 40px; text-align: center; }
+  .text-primary { color: var(--primary); }
+  .text-danger { color: var(--danger); }
+  .text-muted { color: var(--muted); }
+
+  /* =========================================================
+     STUDENT BANNER + NAVBAR
+     ========================================================= */
+  .student-bar {
+    background: var(--primary-soft);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    padding: 8px 12px;
+    font-size: .85rem;
+  }
+  .student-bar strong { color: var(--fg); font-weight: 700; }
+  .student-bar span { color: var(--muted); font-weight: 400; }
+
+  .navbar {
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(12px);
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; padding: 0 20px;
+    max-width: 1200px; margin: 0 auto;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem; }
+  .logo-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--primary); color: var(--primary-fg);
+    display: grid; place-items: center; font-weight: 900;
+  }
+  .logo .accent { color: var(--primary); }
+  .nav-links { display: none; gap: 22px; font-size: .9rem; font-weight: 500; color: var(--muted); }
+  .nav-links a:hover { color: var(--primary); }
+  .nav-actions { display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 8px;
+    display: grid; place-items: center;
+    transition: background .15s;
+  }
+  .icon-btn:hover { background: var(--primary-soft); }
+  .btn-disconnect {
+    background: var(--danger); color: white; padding: 8px 16px;
+    border-radius: 8px; font-weight: 700; font-size: .85rem;
+    display: flex; align-items: center; gap: 6px;
+    transition: transform .15s, background .15s;
+  }
+  .btn-disconnect:hover { background: color-mix(in srgb, var(--danger) 85%, black); transform: translateY(-1px); }
+
+  @media (min-width: 768px) {
+    .nav-links { display: flex; }
+  }
+
+  /* =========================================================
+     BUTTONS
+     ========================================================= */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+    padding: 12px 24px; border-radius: 10px;
+    font-weight: 700; font-size: .95rem;
+    transition: transform .15s, background .15s, box-shadow .15s;
+  }
+  .btn-primary {
+    background: var(--primary); color: var(--primary-fg);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--primary) 40%, transparent);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 22px color-mix(in srgb, var(--primary) 50%, transparent); }
+  .btn-ghost {
+    background: transparent; color: var(--fg); border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--card-hover); }
+  .btn-lg { padding: 16px 32px; font-size: 1.05rem; }
+
+  /* =========================================================
+     HERO
+     ========================================================= */
+  .hero { position: relative; min-height: calc(100vh - 110px); display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
+  .hero .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 16px; border-radius: 999px;
+    background: var(--primary-soft); color: var(--primary);
+    font-size: .85rem; font-weight: 600;
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+    margin-bottom: 24px;
+  }
+  .pill .blink { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+  .hero h1 .stroke { color: var(--primary); }
+  .hero p { color: var(--muted); font-size: 1.15rem; max-width: 600px; margin: 24px auto 36px; }
+  .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .hero-bg {
+    position: absolute; inset: 0; pointer-events: none; opacity: .35;
+    background-image:
+      radial-gradient(circle at 20% 30%, var(--primary-soft) 0, transparent 30%),
+      radial-gradient(circle at 80% 70%, var(--primary-soft) 0, transparent 30%);
+  }
+  .hero-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .hero-particles span {
+    position: absolute; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--primary); opacity: .3;
+    animation: float linear infinite;
+  }
+  @keyframes float {
+    from { transform: translateY(110vh) translateX(0); opacity: 0; }
+    10%  { opacity: .5; }
+    to   { transform: translateY(-20vh) translateX(40px); opacity: 0; }
+  }
+
+  .scroll-hint {
+    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+    color: var(--muted); animation: bounce 2s infinite;
+  }
+  @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(8px); } }
+
+  /* =========================================================
+     CARDS / FEED
+     ========================================================= */
+  .feed-grid {
+    display: grid; gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    margin-top: 36px;
+  }
+  .post-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 22px; transition: transform .2s, background .2s, border-color .2s;
+    box-shadow: var(--shadow);
+  }
+  .post-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--primary) 40%, var(--border)); background: var(--card-hover); }
+  .post-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .post-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 800;
+    background: var(--primary-soft); color: var(--primary);
+  }
+  .post-meta { font-size: .8rem; color: var(--muted); }
+  .post-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 8px; }
+  .post-body { color: var(--muted); font-size: .95rem; }
+  .post-footer { display: flex; gap: 18px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem; }
+  .post-footer span { display: flex; align-items: center; gap: 6px; }
+
+  /* =========================================================
+     COMPARISON
+     ========================================================= */
+  .compare-grid {
+    display: grid; gap: 24px;
+    grid-template-columns: 1fr;
+    margin-top: 32px;
+  }
+  @media (min-width: 768px) { .compare-grid { grid-template-columns: 1fr 1fr; } }
+  .compare-col {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    padding: 28px; box-shadow: var(--shadow);
+  }
+  .compare-col.positive { border-top: 4px solid var(--success); }
+  .compare-col.negative { border-top: 4px solid var(--danger); }
+  .compare-col h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; font-size: 1.4rem; }
+  .compare-col ul { list-style: none; }
+  .compare-col li {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .compare-col li:last-child { border-bottom: none; }
+  .compare-col li strong { display: block; margin-bottom: 4px; }
+  .compare-col li small { color: var(--muted); font-size: .9rem; }
+  .check-icon { width: 22px; height: 22px; border-radius: 50%; background: color-mix(in srgb, var(--success) 20%, transparent); color: var(--success); display: grid; place-items: center; flex-shrink: 0; font-weight: 800; font-size: .85rem; }
+  .x-icon     { width: 22px; height: 22px; border-radius: 50%; background: var(--danger-soft); color: var(--danger); display: grid; place-items: center; flex-shrink: 0; font-weight: 800; font-size: .85rem; }
+
+  /* =========================================================
+     QUIZ
+     ========================================================= */
+  .quiz-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+    padding: 32px; box-shadow: var(--shadow); max-width: 720px; margin: 32px auto 0;
+  }
+  .quiz-progress {
+    height: 8px; background: var(--border); border-radius: 999px; overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .quiz-progress > div { height: 100%; background: var(--primary); border-radius: 999px; transition: width .4s ease; }
+  .quiz-step-num { font-size: .8rem; color: var(--muted); margin-bottom: 8px; }
+  .quiz-question { font-size: 1.3rem; font-weight: 800; margin-bottom: 22px; }
+  .quiz-options { display: grid; gap: 10px; }
+  .quiz-options button {
+    text-align: left; padding: 14px 18px; border-radius: 10px;
+    background: var(--bg-elev); border: 1px solid var(--border);
+    color: var(--fg); font-size: .95rem; transition: all .15s;
+  }
+  .quiz-options button:hover { border-color: var(--primary); background: var(--primary-soft); }
+  .quiz-result {
+    text-align: center; padding: 24px 0;
+  }
+  .result-badge {
+    display: inline-block; padding: 8px 20px; border-radius: 999px;
+    font-weight: 800; font-size: 1.1rem; margin: 16px 0;
+  }
+  .result-baixo  { background: color-mix(in srgb, var(--success) 18%, transparent); color: var(--success); }
+  .result-medio  { background: color-mix(in srgb, var(--warning) 18%, transparent); color: var(--warning); }
+  .result-alto   { background: var(--danger-soft); color: var(--danger); }
+
+  /* =========================================================
+     CALCULATOR
+     ========================================================= */
+  .calc-grid {
+    display: grid; gap: 20px; grid-template-columns: 1fr;
+    max-width: 880px; margin: 32px auto 0;
+  }
+  @media (min-width: 768px) { .calc-grid { grid-template-columns: 1fr 1fr; } }
+  .calc-input-card, .calc-result-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    padding: 28px; box-shadow: var(--shadow);
+  }
+  .calc-input-card label { display: block; margin-bottom: 8px; color: var(--muted); font-size: .9rem; }
+  .calc-input-card input[type="range"] {
+    width: 100%; accent-color: var(--primary); margin: 12px 0;
+  }
+  .calc-input-card .val {
+    font-size: 3rem; font-weight: 900; color: var(--primary); line-height: 1;
+  }
+  .calc-input-card .val small { font-size: 1rem; color: var(--muted); font-weight: 500; margin-left: 8px; }
+  .calc-stat { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .calc-stat:last-child { border-bottom: none; }
+  .calc-stat strong { color: var(--primary); font-size: 1.05rem; }
+
+  /* =========================================================
+     FOCUS SIMULATOR
+     ========================================================= */
+  .focus-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    padding: 32px; box-shadow: var(--shadow); max-width: 720px; margin: 32px auto 0;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .focus-timer {
+    font-size: 4rem; font-weight: 900; color: var(--primary); letter-spacing: -.04em;
+    margin: 16px 0; font-variant-numeric: tabular-nums;
+  }
+  .focus-stats { display: flex; gap: 30px; justify-content: center; margin: 16px 0; flex-wrap: wrap; }
+  .focus-stats div { color: var(--muted); font-size: .9rem; }
+  .focus-stats strong { display: block; font-size: 1.6rem; color: var(--fg); }
+  .focus-stats .ignored strong { color: var(--success); }
+  .focus-stats .clicked strong { color: var(--danger); }
+
+  .notification-stack {
+    position: fixed; bottom: 20px; right: 20px; z-index: 90;
+    display: flex; flex-direction: column-reverse; gap: 10px;
+    max-width: 340px; pointer-events: none;
+  }
+  .notification {
+    pointer-events: auto;
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px; display: flex; gap: 12px; align-items: flex-start;
+    box-shadow: 0 12px 30px rgba(0,0,0,.4);
+    cursor: pointer;
+    animation: slideInNotif .35s ease-out;
+  }
+  .notification.exit { animation: slideOutNotif .3s ease-in forwards; }
+  @keyframes slideInNotif {
+    from { transform: translateX(120%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideOutNotif {
+    to { transform: translateX(120%); opacity: 0; }
+  }
+  .notif-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: grid; place-items: center; flex-shrink: 0;
+    color: white; font-weight: 700; font-size: .8rem;
+  }
+  .notif-body { flex: 1; min-width: 0; }
+  .notif-body .app { font-size: .75rem; color: var(--muted); }
+  .notif-body .text { font-size: .9rem; font-weight: 600; margin-top: 2px; }
+
+  /* =========================================================
+     CAR GAME
+     ========================================================= */
+  .game-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    padding: 8px; box-shadow: var(--shadow); max-width: 720px; margin: 32px auto 0;
+    overflow: hidden;
+  }
+  .game-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 18px; border-bottom: 1px solid var(--border);
+    font-family: 'Courier New', monospace; font-weight: 800;
+  }
+  .game-header .speed { color: var(--primary); }
+  .game-header .score { color: var(--primary); }
+  .game-header .best { color: var(--muted); font-size: .85rem; }
+  .game-area {
+    position: relative; height: 480px; overflow: hidden; user-select: none;
+    background: linear-gradient(180deg, #0a0e1a 0%, #131a2e 50%, #0a0e1a 100%);
+    border-radius: 12px;
+  }
+  .road-grass { position: absolute; top: 0; bottom: 0; width: 10%; background: linear-gradient(180deg, rgba(6,78,59,.4), rgba(6,95,70,.3)); }
+  .road-grass.left { left: 0; } .road-grass.right { right: 0; }
+  .road-edge { position: absolute; top: 0; bottom: 0; width: 3px; background: rgba(253, 224, 71, .7); }
+  .road-edge.left { left: 10%; } .road-edge.right { right: 10%; }
+  .road-dash {
+    position: absolute; top: 0; bottom: 0; width: 4px; transform: translateX(-50%);
+    overflow: hidden;
+  }
+  .road-dash::before {
+    content: ""; position: absolute; left: 0; right: 0; height: 200%; top: -100%;
+    background-image: repeating-linear-gradient(180deg, #fde047 0 24px, transparent 24px 56px);
+    animation: dashScroll linear infinite;
+    animation-duration: var(--dash-speed, 1.2s);
+    animation-play-state: var(--dash-play, paused);
+  }
+  @keyframes dashScroll { from { transform: translateY(0); } to { transform: translateY(56px); } }
+
+  .car {
+    position: absolute; bottom: 20px; width: 56px; height: 80px;
+    transform: translateX(-50%);
+    transition: left .25s cubic-bezier(.4,2,.6,1);
+  }
+  .car-body {
+    position: absolute; inset: 0; border-radius: 10px;
+    background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+    box-shadow: 0 0 24px rgba(56,189,248,.6), inset 0 -8px 12px rgba(0,0,0,.3), inset 0 4px 6px rgba(255,255,255,.3);
+  }
+  .car-windshield { position: absolute; left: 8px; right: 8px; top: 12px; height: 20px; border-radius: 4px; background: linear-gradient(180deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,.2); }
+  .car-rearwindow { position: absolute; left: 8px; right: 8px; bottom: 16px; height: 16px; border-radius: 4px; background: linear-gradient(0deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,.2); }
+  .car-headlight { position: absolute; top: 2px; width: 10px; height: 6px; border-radius: 2px; background: #fef9c3; box-shadow: 0 0 6px rgba(254,240,138,.9); }
+  .car-headlight.left { left: 6px; } .car-headlight.right { right: 6px; }
+  .car-taillight { position: absolute; bottom: 2px; width: 10px; height: 6px; border-radius: 2px; background: #ef4444; box-shadow: 0 0 4px rgba(239,68,68,.7); }
+  .car-taillight.left { left: 6px; } .car-taillight.right { right: 6px; }
+  .car-wheel { position: absolute; width: 8px; height: 20px; background: #111; border: 1px solid #333; border-radius: 2px; }
+  .car-wheel.fl { left: -4px; top: 12px; } .car-wheel.fr { right: -4px; top: 12px; }
+  .car-wheel.bl { left: -4px; bottom: 12px; } .car-wheel.br { right: -4px; bottom: 12px; }
+
+  .obstacle {
+    position: absolute; width: 56px; height: 56px;
+    transform: translateX(-50%);
+    border-radius: 14px; display: grid; place-items: center;
+    border: 2px solid rgba(255,255,255,.2);
+    color: white; font-size: 28px;
+  }
+
+  .game-overlay {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(4px);
+    text-align: center; padding: 24px; z-index: 5;
+  }
+  .game-overlay h3 { margin-bottom: 8px; font-size: 1.6rem; }
+  .game-overlay p { color: var(--muted); margin-bottom: 18px; max-width: 320px; }
+  .crash-icon {
+    width: 60px; height: 60px; border-radius: 14px;
+    background: var(--danger-soft); border: 2px solid var(--danger);
+    color: var(--danger); display: grid; place-items: center;
+    margin-bottom: 12px; font-size: 32px;
+    animation: spinIn .5s cubic-bezier(.4,2,.6,1);
+  }
+  @keyframes spinIn { from { transform: rotate(0) scale(0); } to { transform: rotate(360deg) scale(1); } }
+  .new-record {
+    display: inline-block; padding: 4px 14px; border-radius: 999px;
+    background: color-mix(in srgb, var(--warning) 20%, transparent);
+    color: var(--warning); font-weight: 800; font-size: .8rem;
+    margin-bottom: 14px; animation: bounce 1s infinite;
+  }
+  .game-mobile-controls { display: flex; gap: 12px; padding: 12px; }
+  .game-mobile-controls button {
+    flex: 1; height: 56px; border-radius: 10px;
+    background: var(--bg-elev); border: 1px solid var(--border);
+    color: var(--fg); font-size: 1.6rem; font-weight: 700;
+    transition: background .15s;
+  }
+  .game-mobile-controls button:active { background: var(--primary-soft); }
+  @media (min-width: 700px) { .game-mobile-controls { display: none; } }
+  .game-keys-hint {
+    text-align: center; padding: 12px; color: var(--muted); font-size: .8rem;
+    display: none;
+  }
+  @media (min-width: 700px) { .game-keys-hint { display: block; } }
+  .kbd { display: inline-block; padding: 2px 8px; border-radius: 4px; background: var(--bg-elev); border: 1px solid var(--border); color: var(--fg); font-family: monospace; }
+
+  /* =========================================================
+     STATS / COUNTER / CHART
+     ========================================================= */
+  .stats-row {
+    display: grid; gap: 24px; grid-template-columns: 1fr; margin-top: 32px;
+  }
+  @media (min-width: 800px) { .stats-row { grid-template-columns: 1fr 1.4fr; } }
+  .live-counter {
+    background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+    color: var(--primary-fg); padding: 32px; border-radius: 20px;
+    text-align: center; box-shadow: var(--shadow);
+  }
+  .live-counter small { display: block; font-size: .85rem; opacity: .85; margin-bottom: 8px; }
+  .live-counter .num { font-size: 3rem; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+  .live-counter .num small { font-size: .9rem; opacity: 1; margin-top: 8px; font-weight: 600; }
+  .chart-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+    padding: 24px; box-shadow: var(--shadow);
+  }
+  .chart-card h3 { margin-bottom: 12px; }
+  .chart-card p { color: var(--muted); font-size: .9rem; margin-bottom: 16px; }
+  .chart-svg { width: 100%; height: 220px; }
+
+  /* =========================================================
+     TIPS
+     ========================================================= */
+  .tips-grid {
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    margin-top: 32px;
+  }
+  .tip-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px; transition: transform .2s, border-color .2s; box-shadow: var(--shadow);
+  }
+  .tip-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+  .tip-card .num {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--primary-soft); color: var(--primary);
+    display: grid; place-items: center; font-weight: 800; margin-bottom: 12px;
+  }
+  .tip-card h4 { margin-bottom: 6px; }
+  .tip-card p { color: var(--muted); font-size: .9rem; }
+
+  /* =========================================================
+     QUOTES CAROUSEL
+     ========================================================= */
+  .quote-card {
+    max-width: 720px; margin: 32px auto 0;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 40px; box-shadow: var(--shadow);
+    text-align: center; position: relative; min-height: 200px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .quote-text { font-size: 1.3rem; font-style: italic; color: var(--fg); margin-bottom: 12px; transition: opacity .4s; }
+  .quote-author { color: var(--muted); font-size: .9rem; }
+  .quote-dots { display: flex; gap: 8px; justify-content: center; margin-top: 20px; }
+  .quote-dots span {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer;
+    transition: background .2s, transform .2s;
+  }
+  .quote-dots span.active { background: var(--primary); transform: scale(1.3); }
+
+  /* =========================================================
+     FOOTER
+     ========================================================= */
+  footer {
+    border-top: 1px solid var(--border); background: var(--bg-elev);
+    padding: 60px 20px; text-align: center;
+  }
+  footer .logo-dot { margin: 0 auto 18px; width: 48px; height: 48px; font-size: 1.3rem; }
+  footer .credits { font-size: .9rem; color: var(--muted); margin-bottom: 16px; }
+  footer .student { font-weight: 700; color: var(--fg); }
+  footer .school { font-size: .85rem; color: var(--muted); }
+  footer .year { font-size: .8rem; color: var(--muted); margin-top: 16px; opacity: .7; }
+
+  /* =========================================================
+     DISCONNECT OVERLAY
+     ========================================================= */
+  .disconnect {
+    position: fixed; inset: 0; z-index: 1000;
+    background: #000; color: white;
+    display: none; align-items: center; justify-content: center; flex-direction: column;
+    text-align: center; padding: 24px;
+    animation: fadeIn 1s ease;
+  }
+  .disconnect.show { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .disconnect-circle {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(15,208,255,.15); display: grid; place-items: center;
+    margin-bottom: 28px; animation: breathe 3s infinite ease-in-out;
+  }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(15,208,255,.4); }
+    50%      { transform: scale(1.06); box-shadow: 0 0 0 28px rgba(15,208,255,0); }
+  }
+  .disconnect h2 { font-size: 2.4rem; max-width: 700px; margin-bottom: 16px; line-height: 1.25; }
+  .disconnect p { color: #9ca3af; max-width: 500px; margin-bottom: 28px; }
+
+  /* =========================================================
+     UTILITIES
+     ========================================================= */
+  .fade-in { opacity: 0; transform: translateY(20px); transition: opacity .8s, transform .8s; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+  .text-center { text-align: center; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- =========================================================
+     STUDENT BAR + NAVBAR
+     ========================================================= -->
+<div class="student-bar">
+  <strong>Heindrich Kauã Cordeiro Ferreira</strong>
+  <span> — 1ª Série NEM — EEB Francisco Manfroi</span>
+</div>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="logo-dot">R</div>
+      <span>Rede<span class="accent">Consciente</span></span>
+    </div>
+    <div class="nav-links">
+      <a href="#inicio">Início</a>
+      <a href="#impactos">Impactos</a>
+      <a href="#quiz">Quiz</a>
+      <a href="#tempo">Tempo</a>
+      <a href="#foco">Foco</a>
+      <a href="#jogo">Jogo</a>
+      <a href="#dicas">Dicas</a>
+    </div>
+    <div class="nav-actions">
+      <button class="icon-btn" id="themeToggle" title="Alternar tema" aria-label="Alternar tema">
+        <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <button class="btn-disconnect" onclick="showDisconnect()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+        DESCONECTAR
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- =========================================================
+     HERO
+     ========================================================= -->
+<section id="inicio" class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-particles" id="particles"></div>
+  <div class="container">
+    <span class="pill"><span class="blink"></span> Atenção capturada</span>
+    <h1>Você está sendo<br><span class="stroke">absorvido?</span></h1>
+    <p>O design não é acidental. O scroll não tem fim. A notificação exige sua resposta. Descubra o que acontece com a sua mente enquanto você rola o feed.</p>
+    <div class="hero-cta">
+      <a href="#quiz" class="btn btn-primary btn-lg">Fazer o quiz</a>
+      <a href="#impactos" class="btn btn-ghost btn-lg">Saber mais</a>
+    </div>
+  </div>
+  <div class="scroll-hint">↓</div>
+</section>
+
+<!-- =========================================================
+     IMPACTOS (cards estilo feed)
+     ========================================================= -->
+<section id="impactos" class="muted">
+  <div class="container">
+    <h2 class="text-center">O que as redes fazem com você</h2>
+    <p class="lead">Seis efeitos comprovados que aparecem na vida de quem usa redes sociais sem freio.</p>
+    <div class="feed-grid" id="impactGrid"></div>
+  </div>
+</section>
+
+<!-- =========================================================
+     COMPARAÇÃO POSITIVO X NEGATIVO
+     ========================================================= -->
+<section>
+  <div class="container">
+    <h2 class="text-center">Os dois lados da moeda</h2>
+    <p class="lead">As redes sociais não são vilãs nem heroínas — são ferramentas. O que importa é como você usa.</p>
+    <div class="compare-grid">
+      <div class="compare-col positive">
+        <h3><span class="check-icon">✓</span> Impactos Positivos</h3>
+        <ul id="positiveList"></ul>
+      </div>
+      <div class="compare-col negative">
+        <h3><span class="x-icon">✕</span> Impactos Negativos</h3>
+        <ul id="negativeList"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     QUIZ
+     ========================================================= -->
+<section id="quiz" class="muted">
+  <div class="container">
+    <h2 class="text-center">Você é viciado em redes sociais?</h2>
+    <p class="lead">8 perguntas honestas. Responda sem pensar muito.</p>
+    <div class="quiz-card" id="quizCard"></div>
+  </div>
+</section>
+
+<!-- =========================================================
+     CALCULADORA DE TEMPO
+     ========================================================= -->
+<section id="tempo">
+  <div class="container">
+    <h2 class="text-center">Calculadora de tempo</h2>
+    <p class="lead">Quantas horas por dia você fica nas redes? Veja o que isso significa em um ano.</p>
+    <div class="calc-grid">
+      <div class="calc-input-card">
+        <label>Horas por dia nas redes sociais</label>
+        <div class="val"><span id="calcHours">3</span><small>h/dia</small></div>
+        <input type="range" min="0" max="12" step="0.5" value="3" id="calcSlider" />
+        <p class="text-muted" style="font-size:.85rem; margin-top:8px;">A média mundial em 2025 é cerca de 2,5h por dia.</p>
+      </div>
+      <div class="calc-result-card">
+        <div class="calc-stat"><span>Por semana</span><strong id="rWeek">21h</strong></div>
+        <div class="calc-stat"><span>Por ano</span><strong id="rYear">1.095h</strong></div>
+        <div class="calc-stat"><span>Dias inteiros por ano</span><strong id="rDays">45,6 dias</strong></div>
+        <div class="calc-stat"><span>📚 Livros que poderia ler</span><strong id="rBooks">109</strong></div>
+        <div class="calc-stat"><span>🎬 Filmes que poderia assistir</span><strong id="rMovies">547</strong></div>
+        <div class="calc-stat"><span>😴 Horas de sono extras</span><strong id="rSleep">365h</strong></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     SIMULADOR DE FOCO
+     ========================================================= -->
+<section id="foco" class="muted">
+  <div class="container">
+    <h2 class="text-center">A batalha pela atenção</h2>
+    <p class="lead">Tente se concentrar por 30 segundos. Ignore as notificações que vão aparecer.</p>
+    <div class="focus-card">
+      <div class="focus-timer" id="focusTimer">30</div>
+      <div class="focus-stats">
+        <div class="ignored"><strong id="focusIgnored">0</strong>Ignoradas</div>
+        <div class="clicked"><strong id="focusClicked">0</strong>Clicadas</div>
+      </div>
+      <button class="btn btn-primary btn-lg" id="focusStart">Começar foco</button>
+      <p class="text-muted" id="focusMsg" style="margin-top:14px; font-size:.9rem;"></p>
+    </div>
+  </div>
+</section>
+
+<div class="notification-stack" id="notifStack"></div>
+
+<!-- =========================================================
+     JOGO DO CARRO
+     ========================================================= -->
+<section id="jogo">
+  <div class="container">
+    <h2 class="text-center">Desvie das Redes</h2>
+    <p class="lead">Pilote o carro azul. Desvie das redes sociais que aparecem na pista. Quanto mais longe, mais rápido.</p>
+    <div class="game-card">
+      <div class="game-header">
+        <div>⛽ <span class="speed" id="gameSpeed">36 km/h</span></div>
+        <div>Score: <span class="score" id="gameScore">0</span></div>
+        <div class="best">🏆 Best: <span id="gameBest">0</span></div>
+      </div>
+      <div class="game-area" id="gameArea">
+        <div class="road-grass left"></div>
+        <div class="road-grass right"></div>
+        <div class="road-edge left"></div>
+        <div class="road-edge right"></div>
+        <div class="road-dash" style="left:33.33%"></div>
+        <div class="road-dash" style="left:66.66%"></div>
+
+        <div class="game-overlay" id="gameOverlay">
+          <h3>Mantenha-se na pista</h3>
+          <p>Use as <span class="kbd">←</span> <span class="kbd">→</span> ou os botões abaixo para desviar das redes sociais.</p>
+          <button class="btn btn-primary btn-lg" id="gameStart">🚗  Acelerar</button>
+        </div>
+      </div>
+      <div class="game-mobile-controls">
+        <button id="btnLeft">←</button>
+        <button id="btnRight">→</button>
+      </div>
+      <div class="game-keys-hint">
+        Use as <span class="kbd">←</span> e <span class="kbd">→</span> do teclado
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     STATS — CONTADOR + GRÁFICO
+     ========================================================= -->
+<section class="muted">
+  <div class="container">
+    <h2 class="text-center">Os números são absurdos</h2>
+    <p class="lead">Em tempo real, no mundo todo. Tente não pensar no quanto isso multiplicado por anos.</p>
+    <div class="stats-row">
+      <div class="live-counter">
+        <small>Horas globais nas redes hoje</small>
+        <div class="num" id="liveCounter">0</div>
+        <small>...e contando, em tempo real</small>
+      </div>
+      <div class="chart-card">
+        <h3>Evolução do tempo médio diário</h3>
+        <p>Minutos por pessoa, por dia — 2012 a 2025.</p>
+        <svg class="chart-svg" id="chartSvg" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     DICAS
+     ========================================================= -->
+<section id="dicas">
+  <div class="container">
+    <h2 class="text-center">Estratégias para um uso saudável</h2>
+    <p class="lead">Pequenas mudanças que devolvem horas para a sua vida.</p>
+    <div class="tips-grid" id="tipsGrid"></div>
+  </div>
+</section>
+
+<!-- =========================================================
+     FRASES DE IMPACTO
+     ========================================================= -->
+<section class="muted">
+  <div class="container">
+    <h2 class="text-center">Para refletir</h2>
+    <p class="lead">Frases que valem mais que mil curtidas.</p>
+    <div class="quote-card">
+      <p class="quote-text" id="quoteText">"Se você não está pagando pelo produto, você é o produto."</p>
+      <p class="quote-author" id="quoteAuthor">— Andrew Lewis</p>
+      <div class="quote-dots" id="quoteDots"></div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     CTA FINAL
+     ========================================================= -->
+<section class="text-center">
+  <div class="container">
+    <h2>Pronto para um intervalo?</h2>
+    <p class="lead">O mundo offline é silencioso, lento, e estranho — mas é onde a vida real acontece.</p>
+    <button class="btn btn-disconnect btn-lg" style="font-size:1.1rem; padding:18px 40px;" onclick="showDisconnect()">
+      ⏻  DESCONECTAR-SE
+    </button>
+  </div>
+</section>
+
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
+<footer>
+  <div class="logo-dot">R</div>
+  <p class="credits">Site educativo — Projeto sobre o impacto das redes sociais.</p>
+  <p class="student">Heindrich Kauã Cordeiro Ferreira</p>
+  <p class="school">1ª Série NEM — EEB Francisco Manfroi</p>
+  <p class="year">© 2026 RedeConsciente. Feito para refletir.</p>
+</footer>
+
+<!-- =========================================================
+     DISCONNECT OVERLAY
+     ========================================================= -->
+<div class="disconnect" id="disconnectOverlay">
+  <div class="disconnect-circle">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0fd0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+  </div>
+  <h2>O mundo real está esperando por você.</h2>
+  <p>Respire fundo. Olhe pela janela. Ligue para alguém que você ama. As notificações podem esperar.</p>
+  <button class="btn btn-ghost" style="border-color:rgba(255,255,255,.2); color:white;" onclick="hideDisconnect()">Voltar</button>
+</div>
+
+<script>
+/* =========================================================
+   DATA
+   ========================================================= */
+const IMPACTS = [
+  { title: "Vício em redes sociais",      icon: "📱", body: "Rolagem infinita e recompensas imprevisíveis (curtidas) são desenhadas para te prender — o mesmo princípio dos cassinos.", reactions: ["💔 1.2k", "💬 340"] },
+  { title: "Procrastinação",              icon: "⏳", body: "Cada notificação rouba até 23 minutos da sua concentração. Trabalho e estudos pagam o preço.", reactions: ["💔 2.1k", "💬 580"] },
+  { title: "Ansiedade e comparação",       icon: "🪞", body: "Comparar sua vida real com vidas editadas gera insatisfação, baixa autoestima e crises de ansiedade.", reactions: ["💔 4.8k", "💬 1.3k"] },
+  { title: "Falta de sono",               icon: "🌙", body: "A luz azul antes de dormir bagunça a melatonina. Resultado: sono ruim, manhãs ruins, semanas ruins.", reactions: ["💔 1.7k", "💬 410"] },
+  { title: "Isolamento social",           icon: "🏝️", body: "Estar 'conectado' o dia todo pode te afastar das pessoas reais que estão na sua frente.", reactions: ["💔 980", "💬 220"] },
+  { title: "Cyberbullying e desinformação", icon: "⚠️", body: "Telas dão coragem para ataques anônimos. E fake news se espalham 6x mais rápido que a verdade.", reactions: ["💔 3.4k", "💬 900"] },
+];
+
+const POSITIVES = [
+  { t: "Conexão Global",       d: "Mantém laços com família e amigos longe, supera distâncias geográficas." },
+  { t: "Acesso à Informação",  d: "Democratiza o conhecimento e amplia a consciência sobre causas sociais." },
+  { t: "Negócios e Carreira",   d: "Plataformas como LinkedIn, Instagram e TikTok são vitais para empreender e crescer profissionalmente." },
+  { t: "Apoio Social",         d: "Grupos de suporte ajudam pessoas com dificuldades e reduzem o isolamento." },
+];
+
+const NEGATIVES = [
+  { t: "Saúde Mental",          d: "Aumento de ansiedade, depressão, baixa autoestima e sentimentos de inadequação." },
+  { t: "Dependência e Vício",    d: "Mecanismos de design viciantes — rolagem infinita, recompensas variáveis, notificações." },
+  { t: "Desinformação e Polarização", d: "Fake news e conteúdo sensacionalista acirram conflitos políticos e sociais." },
+  { t: "Cyberbullying",         d: "O ambiente virtual facilita assédio, insegurança e ataques anônimos." },
+];
+
+const QUIZ = [
+  { q: "Qual a primeira coisa que você faz ao acordar?", opts: [
+    { t: "Pego o celular antes mesmo de levantar", v: 3 },
+    { t: "Tomo café e depois olho o celular",      v: 2 },
+    { t: "Fico um tempo offline pela manhã",       v: 1 },
+    { t: "Quase nem mexo no celular pela manhã",   v: 0 },
+  ]},
+  { q: "Quantas horas você passa nas redes por dia?", opts: [
+    { t: "Mais de 6 horas",  v: 3 },
+    { t: "Entre 3 e 6 horas", v: 2 },
+    { t: "Entre 1 e 3 horas", v: 1 },
+    { t: "Menos de 1 hora",   v: 0 },
+  ]},
+  { q: "Como você se sente quando está sem o celular?", opts: [
+    { t: "Ansioso(a), incompleto(a)",             v: 3 },
+    { t: "Um pouco inquieto(a)",                  v: 2 },
+    { t: "Indiferente, na maior parte do tempo",  v: 1 },
+    { t: "Aliviado(a), descanso para minha mente", v: 0 },
+  ]},
+  { q: "Você já perdeu sono por ficar nas redes?", opts: [
+    { t: "Sim, várias vezes por semana", v: 3 },
+    { t: "Sim, de vez em quando",        v: 2 },
+    { t: "Quase nunca",                  v: 1 },
+    { t: "Nunca",                        v: 0 },
+  ]},
+  { q: "Você já se comparou negativamente a alguém das redes?", opts: [
+    { t: "Sim, com frequência",         v: 3 },
+    { t: "Algumas vezes",               v: 2 },
+    { t: "Raramente",                   v: 1 },
+    { t: "Nunca, sei que é tudo editado", v: 0 },
+  ]},
+  { q: "Você consegue passar uma refeição inteira sem o celular?", opts: [
+    { t: "Não, sempre tô olhando", v: 3 },
+    { t: "Difícil, mas tento",     v: 2 },
+    { t: "Sim, sem grandes problemas", v: 1 },
+    { t: "Sim, e prefiro assim",   v: 0 },
+  ]},
+  { q: "Você desbloqueia o celular quantas vezes por dia?", opts: [
+    { t: "Mais de 100 vezes",     v: 3 },
+    { t: "Entre 50 e 100 vezes",  v: 2 },
+    { t: "Entre 20 e 50 vezes",   v: 1 },
+    { t: "Menos de 20 vezes",     v: 0 },
+  ]},
+  { q: "As redes já atrapalharam seus estudos ou trabalho?", opts: [
+    { t: "Sim, com frequência", v: 3 },
+    { t: "Sim, algumas vezes", v: 2 },
+    { t: "Raramente",          v: 1 },
+    { t: "Nunca",              v: 0 },
+  ]},
+];
+
+const TIPS = [
+  { t: "Desative notificações não essenciais", d: "Cada bip é uma interrupção. Deixe ligadas só as que realmente importam." },
+  { t: "Defina horários sem tela",            d: "Crie zonas livres do celular — refeições, primeira hora da manhã, antes de dormir." },
+  { t: "Use o tempo de tela do celular",       d: "Configure limites diários de uso por aplicativo. O próprio celular pode ajudar." },
+  { t: "Substitua o scroll por algo concreto", d: "Antes de abrir o app por hábito, faça 10 respirações ou olhe pela janela." },
+  { t: "Siga menos contas, melhores contas",   d: "Uma timeline curada vale mais que mil seguidores aleatórios." },
+  { t: "Tenha um hobby offline",              d: "Música, esporte, leitura, cozinha. Coisas reais que enchem o tempo melhor que o feed." },
+];
+
+const QUOTES = [
+  { t: "Se você não está pagando pelo produto, você é o produto.",                a: "Andrew Lewis" },
+  { t: "A tecnologia deveria melhorar sua vida, não se tornar sua vida.",         a: "Billy Cox" },
+  { t: "A coisa mais valiosa que você pode oferecer ao mundo é sua atenção.",     a: "James Williams" },
+  { t: "Quase tudo vai funcionar de novo se você desconectar por alguns minutos. Inclusive você.", a: "Anne Lamott" },
+  { t: "O preço da nossa distração é a vida que poderíamos estar vivendo.",       a: "Anônimo" },
+  { t: "O scroll infinito existe porque sua atenção também parece infinita — não é.", a: "Tristan Harris" },
+];
+
+const SOCIAL = [
+  { name: "Instagram", color: "#E1306C", letter: "📷" },
+  { name: "TikTok",    color: "#000000", letter: "♪" },
+  { name: "Facebook",  color: "#1877F2", letter: "f" },
+  { name: "WhatsApp",  color: "#25D366", letter: "💬" },
+  { name: "YouTube",   color: "#FF0000", letter: "▶" },
+  { name: "Twitter",   color: "#1DA1F2", letter: "𝕏" },
+  { name: "Snapchat",  color: "#FFFC00", letter: "👻" },
+  { name: "Pinterest", color: "#E60023", letter: "P" },
+];
+
+const FAKE_NOTIFS = [
+  { app: "Instagram",  text: "beatriz_oli curtiu sua foto",  c: "#E1306C", l: "📷" },
+  { app: "WhatsApp",   text: "Você tem 12 mensagens não lidas", c: "#25D366", l: "💬" },
+  { app: "TikTok",     text: "Um novo vídeo bombou — assista",   c: "#000",    l: "♪" },
+  { app: "Twitter",    text: "Veja o que está em alta no Brasil", c: "#1DA1F2", l: "𝕏" },
+  { app: "YouTube",    text: "Novo vídeo do seu canal favorito", c: "#FF0000", l: "▶" },
+  { app: "Facebook",   text: "5 amigos comentaram em uma publicação", c: "#1877F2", l: "f" },
+  { app: "Instagram",  text: "Você tem 3 novos seguidores",  c: "#E1306C", l: "📷" },
+  { app: "Snapchat",   text: "matheus_s te mandou um snap",  c: "#FFFC00", l: "👻" },
+  { app: "WhatsApp",   text: "Mãe: você já jantou?",         c: "#25D366", l: "💬" },
+  { app: "TikTok",     text: "Alguém duetou com seu vídeo",  c: "#000",    l: "♪" },
+];
+
+/* =========================================================
+   THEME TOGGLE
+   ========================================================= */
+const themeBtn = document.getElementById("themeToggle");
+const themeIcon = document.getElementById("themeIcon");
+const SUN_SVG  = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+const MOON_SVG = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+function applyTheme(t) {
+  document.body.setAttribute("data-theme", t);
+  themeIcon.innerHTML = t === "dark" ? SUN_SVG : MOON_SVG;
+  localStorage.setItem("rc_theme", t);
+}
+applyTheme(localStorage.getItem("rc_theme") || "dark");
+themeBtn.addEventListener("click", () => applyTheme(document.body.getAttribute("data-theme") === "dark" ? "light" : "dark"));
+
+/* =========================================================
+   PARTICLES
+   ========================================================= */
+(function particles() {
+  const wrap = document.getElementById("particles");
+  for (let i = 0; i < 25; i++) {
+    const s = document.createElement("span");
+    s.style.left = Math.random() * 100 + "%";
+    s.style.animationDuration = (8 + Math.random() * 12) + "s";
+    s.style.animationDelay = (Math.random() * 10) + "s";
+    s.style.opacity = (0.15 + Math.random() * 0.4).toFixed(2);
+    s.style.width = s.style.height = (3 + Math.random() * 6) + "px";
+    wrap.appendChild(s);
+  }
+})();
+
+/* =========================================================
+   IMPACT CARDS
+   ========================================================= */
+(function renderImpacts() {
+  const grid = document.getElementById("impactGrid");
+  grid.innerHTML = IMPACTS.map(i => `
+    <article class="post-card">
+      <div class="post-head">
+        <div class="post-avatar">${i.icon}</div>
+        <div>
+          <div style="font-weight:700">RedeConsciente</div>
+          <div class="post-meta">@verdade • agora</div>
+        </div>
+      </div>
+      <div class="post-title">${i.title}</div>
+      <div class="post-body">${i.body}</div>
+      <div class="post-footer">
+        ${i.reactions.map(r => `<span>${r}</span>`).join("")}
+      </div>
+    </article>
+  `).join("");
+})();
+
+/* =========================================================
+   COMPARISON LISTS
+   ========================================================= */
+(function renderCompare() {
+  document.getElementById("positiveList").innerHTML = POSITIVES.map(p => `
+    <li><span class="check-icon">✓</span><div><strong>${p.t}</strong><small>${p.d}</small></div></li>
+  `).join("");
+  document.getElementById("negativeList").innerHTML = NEGATIVES.map(n => `
+    <li><span class="x-icon">✕</span><div><strong>${n.t}</strong><small>${n.d}</small></div></li>
+  `).join("");
+})();
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+const quizCard = document.getElementById("quizCard");
+let quizStep = 0;
+let quizScore = 0;
+
+function renderQuizStep() {
+  const q = QUIZ[quizStep];
+  const pct = (quizStep / QUIZ.length) * 100;
+  quizCard.innerHTML = `
+    <div class="quiz-progress"><div style="width:${pct}%"></div></div>
+    <div class="quiz-step-num">Pergunta ${quizStep + 1} de ${QUIZ.length}</div>
+    <div class="quiz-question">${q.q}</div>
+    <div class="quiz-options">
+      ${q.opts.map((o, idx) => `<button data-v="${o.v}" data-i="${idx}">${o.t}</button>`).join("")}
+    </div>
+  `;
+  quizCard.querySelectorAll(".quiz-options button").forEach(b => {
+    b.addEventListener("click", () => {
+      quizScore += parseInt(b.dataset.v, 10);
+      quizStep++;
+      if (quizStep >= QUIZ.length) renderQuizResult();
+      else renderQuizStep();
+    });
+  });
+}
+function renderQuizResult() {
+  const max = QUIZ.length * 3;
+  const pct = (quizScore / max) * 100;
+  let level, badge, msg;
+  if (pct < 35)      { level = "Baixo uso";  badge = "result-baixo"; msg = "Parabéns. Você tem uma relação saudável com as redes. Mantenha o equilíbrio!"; }
+  else if (pct < 70) { level = "Uso moderado"; badge = "result-medio"; msg = "Você não está em risco, mas dá para reduzir. Comece desativando notificações que não são essenciais."; }
+  else               { level = "Uso alto";   badge = "result-alto"; msg = "As redes estão consumindo um espaço grande na sua vida. Que tal experimentar um dia offline por semana?"; }
+  localStorage.setItem("rc_quiz_result", JSON.stringify({ pct, level }));
+  quizCard.innerHTML = `
+    <div class="quiz-result">
+      <div style="font-size:.9rem; color:var(--muted)">Seu resultado</div>
+      <div class="result-badge ${badge}">${level}</div>
+      <p style="color:var(--muted); max-width:480px; margin:0 auto 24px">${msg}</p>
+      <div style="font-size:2.5rem; font-weight:900; color:var(--primary); margin-bottom:18px">${Math.round(pct)}%</div>
+      <button class="btn btn-ghost" id="quizRestart">Refazer quiz</button>
+    </div>
+  `;
+  document.getElementById("quizRestart").addEventListener("click", () => {
+    quizStep = 0; quizScore = 0; renderQuizStep();
+  });
+}
+renderQuizStep();
+
+/* =========================================================
+   CALCULATOR
+   ========================================================= */
+const slider = document.getElementById("calcSlider");
+const calcHours = document.getElementById("calcHours");
+function updateCalc() {
+  const h = parseFloat(slider.value);
+  calcHours.textContent = h.toString().replace(".", ",");
+  const week = h * 7;
+  const year = h * 365;
+  const days = year / 24;
+  const books = Math.floor(year / 10);
+  const movies = Math.floor((year * 60) / 120);
+  const sleep = Math.floor(year);
+  document.getElementById("rWeek").textContent = week.toLocaleString("pt-BR") + "h";
+  document.getElementById("rYear").textContent = year.toLocaleString("pt-BR") + "h";
+  document.getElementById("rDays").textContent = days.toFixed(1).replace(".", ",") + " dias";
+  document.getElementById("rBooks").textContent = books.toLocaleString("pt-BR");
+  document.getElementById("rMovies").textContent = movies.toLocaleString("pt-BR");
+  document.getElementById("rSleep").textContent = sleep.toLocaleString("pt-BR") + "h";
+  localStorage.setItem("rc_calc_hours", h);
+}
+slider.addEventListener("input", updateCalc);
+const savedH = localStorage.getItem("rc_calc_hours");
+if (savedH) { slider.value = savedH; }
+updateCalc();
+
+/* =========================================================
+   FOCUS SIMULATOR
+   ========================================================= */
+const focusBtn = document.getElementById("focusStart");
+const focusTimer = document.getElementById("focusTimer");
+const focusIgnoredEl = document.getElementById("focusIgnored");
+const focusClickedEl = document.getElementById("focusClicked");
+const focusMsg = document.getElementById("focusMsg");
+const notifStack = document.getElementById("notifStack");
+
+let focusActive = false;
+let focusInterval = null;
+let focusSpawn = null;
+let focusSecs = 30;
+let ignored = 0, clicked = 0;
+const liveNotifs = new Map();
+
+function spawnNotif() {
+  const n = FAKE_NOTIFS[Math.floor(Math.random() * FAKE_NOTIFS.length)];
+  const id = Date.now() + Math.random();
+  const el = document.createElement("div");
+  el.className = "notification";
+  el.innerHTML = `
+    <div class="notif-icon" style="background:${n.c}">${n.l}</div>
+    <div class="notif-body">
+      <div class="app">${n.app}</div>
+      <div class="text">${n.text}</div>
+    </div>
+  `;
+  el.addEventListener("click", () => {
+    if (!liveNotifs.has(id)) return;
+    clicked++; focusClickedEl.textContent = clicked;
+    removeNotif(id, true);
+  });
+  notifStack.appendChild(el);
+  liveNotifs.set(id, el);
+  setTimeout(() => {
+    if (liveNotifs.has(id)) {
+      ignored++; focusIgnoredEl.textContent = ignored;
+      removeNotif(id, false);
+    }
+  }, 4500);
+}
+function removeNotif(id, wasClicked) {
+  const el = liveNotifs.get(id);
+  if (!el) return;
+  liveNotifs.delete(id);
+  el.classList.add("exit");
+  setTimeout(() => el.remove(), 300);
+}
+function clearAllNotifs() {
+  liveNotifs.forEach((el, id) => removeNotif(id, false));
+}
+function startFocus() {
+  focusActive = true;
+  focusSecs = 30; ignored = 0; clicked = 0;
+  focusIgnoredEl.textContent = "0"; focusClickedEl.textContent = "0";
+  focusTimer.textContent = "30"; focusMsg.textContent = "";
+  focusBtn.disabled = true; focusBtn.textContent = "Em foco...";
+  focusInterval = setInterval(() => {
+    focusSecs--; focusTimer.textContent = focusSecs;
+    if (focusSecs <= 0) endFocus();
+  }, 1000);
+  focusSpawn = setInterval(spawnNotif, 2200);
+  setTimeout(spawnNotif, 600);
+}
+function endFocus() {
+  focusActive = false;
+  clearInterval(focusInterval); clearInterval(focusSpawn);
+  setTimeout(clearAllNotifs, 300);
+  focusBtn.disabled = false; focusBtn.textContent = "Tentar de novo";
+  let m = `Você ignorou ${ignored} notificação(ões) e clicou em ${clicked}. `;
+  if (clicked === 0)      m += "Foco impecável!";
+  else if (clicked < 3)   m += "Bom controle, mas ainda dá para melhorar.";
+  else                    m += "As redes te pegaram. Treino é tudo.";
+  focusMsg.textContent = m;
+}
+focusBtn.addEventListener("click", startFocus);
+
+/* =========================================================
+   CAR GAME
+   ========================================================= */
+const gameArea  = document.getElementById("gameArea");
+const gameOverlay = document.getElementById("gameOverlay");
+const gameStartBtn = document.getElementById("gameStart");
+const gameSpeedEl = document.getElementById("gameSpeed");
+const gameScoreEl = document.getElementById("gameScore");
+const gameBestEl  = document.getElementById("gameBest");
+
+const LANES_PCT = [16.66, 50, 83.33];
+const GAME_HEIGHT = 480;
+let gameState = {
+  playing: false,
+  score: 0,
+  best: parseInt(localStorage.getItem("rc_car_best") || "0", 10),
+  lane: 1,
+  speed: 3,
+  obstacles: [],
+  lastSpawn: 0,
+  lastFrame: 0,
+  raf: 0,
+  car: null,
+};
+gameBestEl.textContent = gameState.best;
+
+function makeCar() {
+  const car = document.createElement("div");
+  car.className = "car";
+  car.innerHTML = `
+    <div class="car-body"></div>
+    <div class="car-windshield"></div>
+    <div class="car-rearwindow"></div>
+    <div class="car-headlight left"></div>
+    <div class="car-headlight right"></div>
+    <div class="car-taillight left"></div>
+    <div class="car-taillight right"></div>
+    <div class="car-wheel fl"></div>
+    <div class="car-wheel fr"></div>
+    <div class="car-wheel bl"></div>
+    <div class="car-wheel br"></div>
+  `;
+  car.style.left = LANES_PCT[gameState.lane] + "%";
+  return car;
+}
+function setDashSpeed(s) {
+  const dur = Math.max(0.18, 1.2 - s * 0.08);
+  document.querySelectorAll(".road-dash").forEach(d => {
+    d.style.setProperty("--dash-speed", dur + "s");
+    d.style.setProperty("--dash-play", gameState.playing ? "running" : "paused");
+  });
+}
+function startGame() {
+  gameState.playing = true; gameState.score = 0; gameState.lane = 1;
+  gameState.speed = 3; gameState.obstacles.forEach(o => o.el.remove()); gameState.obstacles = [];
+  gameState.lastSpawn = 0; gameState.lastFrame = 0;
+  gameOverlay.classList.add("hidden");
+  if (gameState.car) gameState.car.remove();
+  gameState.car = makeCar();
+  gameArea.appendChild(gameState.car);
+  setDashSpeed(gameState.speed);
+  gameScoreEl.textContent = "0";
+  gameSpeedEl.textContent = Math.round(gameState.speed * 12) + " km/h";
+  gameState.raf = requestAnimationFrame(gameLoop);
+}
+function endGame(crashedNotif) {
+  gameState.playing = false;
+  cancelAnimationFrame(gameState.raf);
+  setDashSpeed(0);
+  if (gameState.score > gameState.best) {
+    gameState.best = gameState.score;
+    localStorage.setItem("rc_car_best", gameState.best.toString());
+    gameBestEl.textContent = gameState.best;
+  }
+  const newRecord = gameState.score >= gameState.best && gameState.score > 0;
+  gameOverlay.classList.remove("hidden");
+  gameOverlay.innerHTML = `
+    ${crashedNotif ? `<div class="crash-icon" style="background:${crashedNotif.c}40; border-color:${crashedNotif.c}; color:${crashedNotif.c}">${crashedNotif.l}</div>` : ""}
+    <h3 style="color:var(--danger)">Você bateu!</h3>
+    <p>O ${crashedNotif ? crashedNotif.name : "feed"} te pegou. Score final: <strong style="color:var(--primary)">${gameState.score}</strong></p>
+    ${newRecord ? '<div class="new-record">NOVO RECORDE!</div>' : ""}
+    <button class="btn btn-primary btn-lg" id="gameRetry">↻  Tentar novamente</button>
+  `;
+  document.getElementById("gameRetry").addEventListener("click", startGame);
+}
+function spawnObstacle() {
+  const lane = Math.floor(Math.random() * 3);
+  const social = SOCIAL[Math.floor(Math.random() * SOCIAL.length)];
+  const el = document.createElement("div");
+  el.className = "obstacle";
+  el.style.background = social.color;
+  el.style.boxShadow = `0 0 20px ${social.color}80, 0 8px 16px rgba(0,0,0,0.5)`;
+  el.style.color = social.color === "#FFFC00" || social.color === "#000000" ? (social.color === "#000000" ? "#fff" : "#000") : "#fff";
+  el.textContent = social.letter;
+  el.style.left = LANES_PCT[lane] + "%";
+  el.style.top = "-60px";
+  gameArea.appendChild(el);
+  gameState.obstacles.push({ el, lane, y: -60, social });
+}
+function gameLoop(ts) {
+  if (!gameState.playing) return;
+  if (!gameState.lastFrame) { gameState.lastFrame = ts; gameState.lastSpawn = ts; }
+  const dt = ts - gameState.lastFrame;
+  gameState.lastFrame = ts;
+  const move = (gameState.speed * dt) / 16;
+
+  const carY = GAME_HEIGHT - 100;
+  const carBottom = GAME_HEIGHT - 20;
+  let crashed = null;
+
+  for (let i = gameState.obstacles.length - 1; i >= 0; i--) {
+    const o = gameState.obstacles[i];
+    o.y += move;
+    o.el.style.top = o.y + "px";
+    // Collision check
+    if (o.lane === gameState.lane && o.y + 56 > carY && o.y < carBottom) {
+      crashed = o.social; break;
+    }
+    // Off-screen
+    if (o.y > GAME_HEIGHT) {
+      o.el.remove();
+      gameState.obstacles.splice(i, 1);
+      gameState.score++;
+      gameScoreEl.textContent = gameState.score;
+    }
+  }
+  if (crashed) { endGame(crashed); return; }
+
+  const spawnInterval = Math.max(450, 1100 - gameState.speed * 70);
+  if (ts - gameState.lastSpawn > spawnInterval) {
+    gameState.lastSpawn = ts;
+    spawnObstacle();
+  }
+  gameState.speed = Math.min(12, 3 + gameState.score * 0.06);
+  setDashSpeed(gameState.speed);
+  gameSpeedEl.textContent = Math.round(gameState.speed * 12) + " km/h";
+
+  gameState.raf = requestAnimationFrame(gameLoop);
+}
+function moveLane(dir) {
+  if (!gameState.playing) return;
+  const newLane = Math.max(0, Math.min(2, gameState.lane + dir));
+  if (newLane === gameState.lane) return;
+  gameState.lane = newLane;
+  if (gameState.car) gameState.car.style.left = LANES_PCT[newLane] + "%";
+}
+gameStartBtn.addEventListener("click", startGame);
+document.getElementById("btnLeft").addEventListener("click",  () => moveLane(-1));
+document.getElementById("btnRight").addEventListener("click", () => moveLane(1));
+document.addEventListener("keydown", (e) => {
+  if (!gameState.playing) return;
+  if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a")  { e.preventDefault(); moveLane(-1); }
+  if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") { e.preventDefault(); moveLane(1); }
+});
+
+/* =========================================================
+   LIVE COUNTER
+   ========================================================= */
+(function liveCounter() {
+  const el = document.getElementById("liveCounter");
+  let n = 1247000 + Math.floor(Math.random() * 50000);
+  el.textContent = n.toLocaleString("pt-BR");
+  setInterval(() => {
+    n += Math.floor(40 + Math.random() * 120);
+    el.textContent = n.toLocaleString("pt-BR");
+  }, 600);
+})();
+
+/* =========================================================
+   CHART
+   ========================================================= */
+(function chart() {
+  const data = [
+    [2012, 90], [2013, 95], [2014, 102], [2015, 108], [2016, 115],
+    [2017, 122], [2018, 128], [2019, 132], [2020, 145], [2021, 148],
+    [2022, 151], [2023, 153], [2024, 156], [2025, 158],
+  ];
+  const W = 600, H = 220, P = 36;
+  const xs = i => P + (i / (data.length - 1)) * (W - P * 2);
+  const yMax = 170, yMin = 70;
+  const ys = v => H - P - ((v - yMin) / (yMax - yMin)) * (H - P * 2);
+  let path = "M" + xs(0) + " " + ys(data[0][1]);
+  let area = "M" + xs(0) + " " + (H - P);
+  area += " L" + xs(0) + " " + ys(data[0][1]);
+  data.forEach((d, i) => { path += " L" + xs(i) + " " + ys(d[1]); area += " L" + xs(i) + " " + ys(d[1]); });
+  area += " L" + xs(data.length - 1) + " " + (H - P) + " Z";
+  const ticks = [70, 100, 130, 160];
+  const yLines = ticks.map(t => `<line x1="${P}" x2="${W - P}" y1="${ys(t)}" y2="${ys(t)}" stroke="currentColor" stroke-opacity=".08" /><text x="${P - 6}" y="${ys(t) + 4}" text-anchor="end" font-size="10" fill="currentColor" fill-opacity=".5">${t}min</text>`).join("");
+  const xLabels = data.filter((_, i) => i % 2 === 0).map((d, i) => `<text x="${xs(i * 2)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity=".5">${d[0]}</text>`).join("");
+  document.getElementById("chartSvg").innerHTML = `
+    <defs>
+      <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="var(--primary)" stop-opacity=".4" />
+        <stop offset="100%" stop-color="var(--primary)" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+    ${yLines}${xLabels}
+    <path d="${area}" fill="url(#grad)" />
+    <path d="${path}" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+    ${data.map((d, i) => `<circle cx="${xs(i)}" cy="${ys(d[1])}" r="3.5" fill="var(--primary)" />`).join("")}
+  `;
+})();
+
+/* =========================================================
+   TIPS
+   ========================================================= */
+(function renderTips() {
+  document.getElementById("tipsGrid").innerHTML = TIPS.map((t, i) => `
+    <div class="tip-card">
+      <div class="num">${i + 1}</div>
+      <h4>${t.t}</h4>
+      <p>${t.d}</p>
+    </div>
+  `).join("");
+})();
+
+/* =========================================================
+   QUOTES CAROUSEL
+   ========================================================= */
+const quoteText = document.getElementById("quoteText");
+const quoteAuthor = document.getElementById("quoteAuthor");
+const quoteDots = document.getElementById("quoteDots");
+let quoteIdx = 0;
+function setQuote(i) {
+  quoteIdx = i;
+  quoteText.style.opacity = "0";
+  quoteAuthor.style.opacity = "0";
+  setTimeout(() => {
+    quoteText.textContent = `"${QUOTES[i].t}"`;
+    quoteAuthor.textContent = "— " + QUOTES[i].a;
+    quoteText.style.opacity = "1";
+    quoteAuthor.style.opacity = "1";
+    quoteDots.querySelectorAll("span").forEach((s, k) => s.classList.toggle("active", k === i));
+  }, 300);
+}
+quoteDots.innerHTML = QUOTES.map((_, i) => `<span data-i="${i}" class="${i === 0 ? "active" : ""}"></span>`).join("");
+quoteDots.querySelectorAll("span").forEach(s => s.addEventListener("click", () => setQuote(parseInt(s.dataset.i, 10))));
+setInterval(() => setQuote((quoteIdx + 1) % QUOTES.length), 6000);
+setQuote(0);
+
+/* =========================================================
+   DISCONNECT OVERLAY
+   ========================================================= */
+function showDisconnect() {
+  document.getElementById("disconnectOverlay").classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+function hideDisconnect() {
+  document.getElementById("disconnectOverlay").classList.remove("show");
+  document.body.style.overflow = "";
+}
+</script>
+</body>
+</html>
