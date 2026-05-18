@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VidaReal × VidaVirtual</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+            background: #f3f4f6;
+        }
+        
+        .phone-frame {
+            max-width: 380px;
+            margin: 15px auto;
+            border: 12px solid #1f2937;
+            border-radius: 48px;
+            background: #ffffff;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+            overflow: hidden;
+            height: 640px;
+            position: relative;
+        }
+        
+        .app-header {
+            background: linear-gradient(90deg, #10b981, #8b5cf6);
+            color: white;
+        }
+        
+        .screen {
+            height: calc(100% - 172px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .light-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="phone-frame">
+        <!-- Status Bar -->
+        <div class="h-8 bg-white flex items-center justify-between px-6 text-xs text-gray-700">
+            <div>09:41</div>
+            <div class="flex gap-3">
+                <i class="fa-solid fa-signal"></i>
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-battery-full"></i>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="app-header p-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-white rounded-2xl flex items-center justify-center text-3xl">⚔️</div>
+                    <h1 class="text-xl font-bold">VidaReal × VidaVirtual</h1>
+                </div>
+            </div>
+            
+            <!-- Dados do Aluno -->
+            <div class="mt-3 bg-white/20 backdrop-blur rounded-2xl p-3 text-xs">
+                <div class="font-semibold">Ruan Carlos de Jesus Vieira</div>
+                <div>1ª Série NEM - EEB Francisco Manfroi</div>
+                <div class="text-emerald-100">Trabalho de Língua Portuguesa</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white border-b flex text-sm shadow-sm">
+            <button onclick="switchTab(0)" id="tab0" class="flex-1 py-3 tab-active font-medium">Início</button>
+            <button onclick="switchTab(1)" id="tab1" class="flex-1 py-3 text-gray-500">Real</button>
+            <button onclick="switchTab(2)" id="tab2" class="flex-1 py-3 text-gray-500">Virtual</button>
+            <button onclick="switchTab(3)" id="tab3" class="flex-1 py-3 text-gray-500">Bem-Estar</button>
+            <button onclick="switchTab(4)" id="tab4" class="flex-1 py-3 text-gray-500">Comparar</button>
+        </div>
+
+        <!-- ==================== TELAS ==================== -->
+
+        <!-- Tela Início -->
+        <div id="screen0" class="screen p-5">
+            <div class="text-center py-6">
+                <div class="text-6xl mb-4">🌳 <span class="text-4xl text-gray-400">VS</span> 📱</div>
+                <h2 class="text-2xl font-bold text-gray-800">Equilíbrio é a chave</h2>
+            </div>
+            
+            <div onclick="switchTab(3)" class="light-card rounded-3xl p-6 text-center cursor-pointer hover:shadow-md transition">
+                <h3 class="font-semibold text-lg text-emerald-600">Ferramentas de Bem-Estar</h3>
+                <p class="text-sm text-gray-600 mt-2">Técnicas para reduzir ansiedade e melhorar o foco</p>
+            </div>
+        </div>
+
+        <!-- Tela Vida Real -->
+        <div id="screen1" class="screen hidden p-5">
+            <h2 class="text-2xl font-bold text-emerald-700 mb-6">🌳 Vida Real</h2>
+            <p class="text-gray-600">Experiências autênticas, saúde e conexões verdadeiras.</p>
+        </div>
+
+        <!-- Tela Vida Virtual -->
+        <div id="screen2" class="screen hidden p-5">
+            <h2 class="text-2xl font-bold text-purple-600 mb-6">📱 Vida Virtual</h2>
+            <p class="text-gray-600">Conexões rápidas, entretenimento e informação instantânea.</p>
+        </div>
+
+        <!-- Nova Tela: Bem-Estar -->
+        <div id="screen3" class="screen hidden p-5 space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800">🧘 Bem-Estar</h2>
+            
+            <!-- Técnicas de Respiração -->
+            <div class="light-card rounded-3xl p-6">
+                <h3 class="font-semibold text-lg mb-4 flex items-center gap-2">
+                    🌬️ Técnicas de Respiração para Ansiedade
+                </h3>
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <p class="font-medium">1. Respiração 4-7-8</p>
+                        <p class="text-gray-600">Inspire por 4s → Segure por 7s → Expire por 8s</p>
+                    </div>
+                    <div>
+                        <p class="font-medium">2. Respiração Quadrada</p>
+                        <p class="text-gray-600">Inspire 4s → Segure 4s → Expire 4s → Segure 4s</p>
+                    </div>
+                    <div>
+                        <p class="font-medium">3. Respiração Diafragmática</p>
+                        <p class="text-gray-600">Coloque a mão na barriga e respire profundamente.</p>
+                    </div>
+                </div>
+                <button onclick="alert('Iniciando exercício de respiração...')" 
+                        class="mt-5 w-full bg-emerald-600 text-white py-3 rounded-2xl font-medium">
+                    Iniciar Exercício
+                </button>
+            </div>
+
+            <!-- Desconectar Notificações -->
+            <div class="light-card rounded-3xl p-6">
+                <h3 class="font-semibold text-lg mb-3">📴 Modo Estudo</h3>
+                <p class="text-gray-600 mb-4">Desconectar notificações para estudar com foco total.</p>
+                <button onclick="toggleFocusMode()" 
+                        class="w-full bg-amber-600 hover:bg-amber-700 text-white py-4 rounded-2xl font-semibold transition">
+                    <i class="fa-solid fa-bell-slash"></i> Ativar Modo Foco (2 horas)
+                </button>
+            </div>
+
+            <!-- Bloqueio Temporário -->
+            <div class="light-card rounded-3xl p-6">
+                <h3 class="font-semibold text-lg mb-3">🚫 Bloqueio Temporário</h3>
+                <p class="text-gray-600 mb-4">Impedir acesso a jogos e redes sociais por um tempo.</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="blockApp('redes')" class="bg-purple-100 text-purple-700 py-3 rounded-2xl text-sm font-medium">Redes Sociais (1h)</button>
+                    <button onclick="blockApp('jogos')" class="bg-rose-100 text-rose-700 py-3 rounded-2xl text-sm font-medium">Jogos (2h)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela Comparar -->
+        <div id="screen4" class="screen hidden p-5">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">⚖️ Comparação de Hábitos</h2>
+            
+            <div class="space-y-5">
+                <div class="light-card rounded-3xl p-5">
+                    <h4 class="font-semibold text-emerald-600 mb-3">✅ Hábitos Bons (Equilíbrio)</h4>
+                    <ul class="text-sm space-y-2 text-gray-700">
+                        <li>• Limitar redes a 1h por dia</li>
+                        <li>• Praticar exercícios físicos</li>
+                        <li>• Conversar pessoalmente com amigos</li>
+                        <li>• Dormir cedo e ter rotina</li>
+                        <li>• Fazer pausas ativas (técnica Pomodoro)</li>
+                    </ul>
+                </div>
+
+                <div class="light-card rounded-3xl p-5">
+                    <h4 class="font-semibold text-red-600 mb-3">❌ Hábitos Ruins (Excesso)</h4>
+                    <ul class="text-sm space-y-2 text-gray-700">
+                        <li>• Ficar horas rolando o feed</li>
+                        <li>• Jogar até de madrugada</li>
+                        <li>• Comparar-se com a vida dos outros</li>
+                        <li>• Ansiedade e irritabilidade</li>
+                        <li>• Sedentarismo e problemas de sono</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="absolute bottom-0 left-0 right-0 bg-white border-t text-center py-2 text-[10px] text-gray-500">
+            Ruan Carlos de Jesus Vieira • Trabalho de Língua Portuguesa
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="absolute bottom-0 left-0 right-0 bg-white border-t py-2">
+            <div class="flex justify-around text-[10px] text-gray-600">
+                <button onclick="switchTab(0)" class="flex flex-col items-center"><i class="fa-solid fa-house"></i><span>Inicio</span></button>
+                <button onclick="switchTab(1)" class="flex flex-col items-center"><i class="fa-solid fa-leaf"></i><span>Real</span></button>
+                <button onclick="switchTab(2)" class="flex flex-col items-center"><i class="fa-solid fa-gamepad"></i><span>Virtual</span></button>
+                <button onclick="switchTab(3)" class="flex flex-col items-center text-emerald-600"><i class="fa-solid fa-heart"></i><span>Bem-Estar</span></button>
+                <button onclick="switchTab(4)" class="flex flex-col items-center"><i class="fa-solid fa-scale-balanced"></i><span>Comparar</span></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
+            document.getElementById(`screen${tab}`).classList.remove('hidden');
+
+            document.querySelectorAll('button[id^="tab"]').forEach(btn => {
+                btn.classList.remove('tab-active', 'text-white', 'bg-gradient-to-r', 'from-emerald-500', 'to-purple-500');
+                btn.classList.add('text-gray-500');
+            });
+            document.getElementById(`tab${tab}`).classList.add('tab-active', 'text-white', 'bg-gradient-to-r', 'from-emerald-500', 'to-purple-500');
+        }
+
+        function toggleFocusMode() {
+            alert("✅ Modo Foco ativado!\n\nNotificações silenciadas por 2 horas.\nBom estudo, Ruan!");
+        }
+
+        function blockApp(type) {
+            const msg = type === 'redes' 
+                ? "Redes Sociais bloqueadas por 1 hora." 
+                : "Jogos bloqueados por 2 horas.";
+            alert("🚫 " + msg + "\n\nFoco ativado!");
+        }
+
+        // Inicialização
+        window.onload = () => {
+            document.getElementById('screen0').classList.remove('hidden');
+        };
+    </script>
+</body>
+</html>
