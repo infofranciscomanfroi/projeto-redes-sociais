@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISCONNECT MAZE - PROGRESSIVE LEVELS</title>
+    <style>
+        body { background: #050510; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow: hidden; height: 100vh; }
+        #stats { display: flex; gap: 40px; margin: 10px 0; font-size: 18px; text-transform: uppercase; z-index: 5; }
+        .stat-val { color: #00f2ff; font-weight: bold; text-shadow: 0 0 10px #00f2ff; }
+        
+        #game-container { position: relative; border: 4px solid #1a1a3a; display: flex; flex-grow: 1; margin-bottom: 10px; }
+        canvas { display: block; background: #000; }
+        
+        .overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); display: none; flex-direction: column; 
+            align-items: center; justify-content: center; text-align: center; z-index: 10; 
+        }
+        .pop-up { 
+            background: #111; border: 3px solid #00ff66; padding: 30px; 
+            border-radius: 15px; box-shadow: 0 0 30px rgba(0, 255, 102, 0.4);
+            animation: popIn 0.3s ease-out;
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        h1 { font-size: 28px; margin-bottom: 5px; color: #eee; }
+        #habit-name { color: #00ff66; font-size: 36px; font-weight: bold; display: block; text-shadow: 0 0 15px #00ff66; }
+        .instruction { margin-top: 20px; font-size: 14px; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+
+        #final-overlay button { 
+            background: #00f2ff; border: none; padding: 12px 30px; font-size: 16px; 
+            cursor: pointer; font-weight: bold; margin-top: 20px; border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="stats">
+<div id="header-aluno">
+        <div class="aluno-info">Jogo Criado Por: Guilherme Jesus</div>
+        <div class="aluno-info">1° Série NEM</div>
+    </div>
+        <div>Nível: <span id="lvl-display" class="stat-val">1</span></div>
+        <div>Vidas: <span id="lives" class="stat-val">5</span></div>
+        <div>Rede Social: <span id="current-social" class="stat-val" style="color: #ff0055;">INSTAGRAM</span></div>
+        <div>Itens: <span id="score" class="stat-val">0</span> / 10</div>
+    </div>
+
+    <div id="game-container">
+        <canvas id="mazeCanvas"></canvas>
+        
+        <div id="collect-overlay" class="overlay">
+            <div class="pop-up">
+                <h1>VOCÊ RECUPEROU:</h1>
+                <span id="habit-name">SAÚDE</span>
+                <div class="instruction">Pressione qualquer tecla para continuar</div>
+            </div>
+        </div>
+
+        <div id="final-overlay" class="overlay">
+            <h1 id="final-title">VITÓRIA!</h1>
+            <p id="final-msg" style="font-size: 20px; color: #ccc;"></p>
+            <button onclick="location.reload()">JOGAR NOVAMENTE</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mazeCanvas');
+        const ctx = canvas.getContext('2d');
+        const habits = ["SAÚDE", "FAMÍLIA", "SONO REPARADOR", "FOCO NO TRABALHO", "LEITURA", "NATUREZA", "AMIGOS REAIS", "MEDITAÇÃO", "AUTOESTIMA", "TEMPO LIVRE"];
+
+        const rows = 13;
+        const cols = 19;
+        let level = 1;
+        let score = 0;
+        let lives = 5;
+        let isPaused = false;
+        let isGameOver = false;
+        let socialIndex = 0;
+        const socials = ["INSTAGRAM", "TIKTOK", "TWITTER", "FACEBOOK", "YOUTUBE"];
+
+        function resizeCanvas() {
+            const padding = 60;
+            const availableHeight = window.innerHeight - padding;
+            const availableWidth = window.innerWidth - 40;
+            const sizeH = Math.floor(availableHeight / rows);
+            const sizeW = Math.floor(availableWidth / cols);
+            const tileSize = Math.min(sizeH, sizeW);
+            canvas.width = cols * tileSize;
+            canvas.height = rows * tileSize;
+            return tileSize;
+        }
+
+        let tileSize = resizeCanvas();
+        window.addEventListener('resize', () => { tileSize = resizeCanvas(); draw(); });
+
+        let maze = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
+            [1,0,1,0,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+            [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,0,1,1,1,3,1,1,1,0,1,1,1,0,1],
+            [1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1],
+            [1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1],
+            [1,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0,1],
+            [1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        let player = { x: 1, y: 1 };
+        let enemies = [];
+
+        function initLevel() {
+            // Reposicionar itens aleatoriamente
+            // Primeiro limpa itens antigos
+            for(let r=0; r<rows; r++) {
+                for(let c=0; c<cols; c++) {
+                    if(maze[r][c] === 2) maze[r][c] = 0;
+                }
+            }
+            // Sorteia 10 novas posições
+            let placed = 0;
+            while(placed < 10) {
+                let rx = Math.floor(Math.random() * cols);
+                let ry = Math.floor(Math.random() * rows);
+                if(maze[ry][rx] === 0 && (rx !== player.x || ry !== player.y)) {
+                    maze[ry][rx] = 2;
+                    placed++;
+                }
+            }
+
+            // Configurar Inimigos (Nível 1 = 1 inimigo, Nível 2 = 2 inimigos, etc)
+            enemies = [];
+            for(let i=0; i<level; i++) {
+                enemies.push({ x: 17, y: 11 });
+            }
+            
+            score = 0;
+            player = { x: 1, y: 1 };
+            document.getElementById('score').innerText = score;
+            document.getElementById('lvl-display').innerText = level;
+        }
+
+        initLevel();
+
+        setInterval(() => {
+            if (!isPaused && !isGameOver) {
+                socialIndex = (socialIndex + 1) % socials.length;
+                document.getElementById('current-social').innerText = socials[socialIndex];
+            }
+        }, 8000);
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    let x = c * tileSize; let y = r * tileSize;
+                    if (maze[r][c] === 1) {
+                        ctx.fillStyle = "#111122"; ctx.fillRect(x, y, tileSize, tileSize);
+                        ctx.strokeStyle = "#3333ff"; ctx.strokeRect(x+2, y+2, tileSize-4, tileSize-4);
+                    } else if (maze[r][c] === 2) {
+                        ctx.fillStyle = "#00ff66"; ctx.beginPath();
+                        ctx.arc(x + tileSize/2, y + tileSize/2, tileSize/5, 0, Math.PI * 2); ctx.fill();
+                    } else if (maze[r][c] === 3) {
+                        ctx.fillStyle = score >= 10 ? "#00f2ff" : "#333";
+                        ctx.fillRect(x, y, tileSize, tileSize);
+                        if(score >= 10) { 
+                            ctx.shadowBlur = 15; ctx.shadowColor = "#00f2ff";
+                            ctx.fillStyle="#000"; ctx.font=`bold ${tileSize/3.5}px Arial`; 
+                            ctx.textAlign = "center";
+                            ctx.fillText("SAÍDA", x + tileSize/2, y + tileSize/2 + (tileSize/10)); 
+                            ctx.shadowBlur = 0;
+                        }
+                    }
+                }
+            }
+            // Player
+            ctx.fillStyle = "#00ff00"; ctx.beginPath();
+            ctx.arc(player.x * tileSize + tileSize/2, player.y * tileSize + tileSize/2, tileSize/3, 0, Math.PI * 2); ctx.fill();
+            // Enemies
+            enemies.forEach(en => {
+                ctx.fillStyle = "#ff0055"; ctx.fillRect(en.x * tileSize + 4, en.y * tileSize + 4, tileSize - 8, tileSize - 8);
+                ctx.fillStyle = "white"; ctx.font = `bold ${tileSize/4}px Arial`; ctx.textAlign = "center";
+                ctx.fillText(socials[socialIndex].substring(0,5), en.x * tileSize + tileSize/2, en.y * tileSize + tileSize/2 + 5);
+            });
+        }
+
+        function movePlayer(dx, dy) {
+            if (isPaused || isGameOver) return;
+            let nx = player.x + dx; let ny = player.y + dy;
+            if (maze[ny][nx] !== 1) {
+                if (maze[ny][nx] === 3 && score < 10) return;
+                player.x = nx; player.y = ny;
+                if (maze[ny][nx] === 2) {
+                    maze[ny][nx] = 0;
+                    showHabitPopup();
+                }
+                if (maze[ny][nx] === 3 && score >= 10) {
+                    level++;
+                    initLevel();
+                }
+            }
+        }
+
+        function showHabitPopup() {
+            isPaused = true;
+            document.getElementById('habit-name').innerText = habits[score % habits.length];
+            score++;
+            document.getElementById('score').innerText = score;
+            document.getElementById('collect-overlay').style.display = "flex";
+        }
+
+        function resumeGame() {
+            if (isPaused && !isGameOver) {
+                isPaused = false;
+                document.getElementById('collect-overlay').style.display = "none";
+                update();
+            }
+        }
+
+        function moveEnemies() {
+            if (isPaused || isGameOver) return;
+            enemies.forEach(en => {
+                let possibleMoves = [{dx: 1, dy: 0}, {dx: -1, dy: 0}, {dx: 0, dy: 1}, {dx: 0, dy: -1}];
+                let validMoves = possibleMoves.filter(m => maze[en.y + m.dy][en.x + m.dx] !== 1);
+                validMoves.sort((a, b) => {
+                    let distA = Math.hypot(player.x - (en.x + a.dx), player.y - (en.y + a.dy));
+                    let distB = Math.hypot(player.x - (en.x + b.dx), player.y - (en.y + b.dy));
+                    return distA - distB;
+                });
+                let finalMove = Math.random() < 0.8 ? validMoves[0] : validMoves[Math.floor(Math.random() * validMoves.length)];
+                if (finalMove) { en.x += finalMove.dx; en.y += finalMove.dy; }
+                if (en.x === player.x && en.y === player.y) {
+                    lives--;
+                    document.getElementById('lives').innerText = lives;
+                    player = { x: 1, y: 1 };
+                    if (lives <= 0) endGame();
+                }
+            });
+        }
+
+        function endGame() {
+            isGameOver = true;
+            const overlay = document.getElementById('final-overlay');
+            overlay.style.display = "flex";
+            document.getElementById('final-title').innerText = "GAME OVER";
+            document.getElementById('final-msg').innerText = `Você chegou ao nível ${level}, mas o algoritmo te consumiu.`;
+        }
+
+        setInterval(moveEnemies, 400);
+
+        function update() {
+            draw();
+            if(!isPaused && !isGameOver) requestAnimationFrame(update);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (isPaused) { resumeGame(); return; }
+            if (e.key.includes("Up") || e.key === "w") movePlayer(0, -1);
+            if (e.key.includes("Down") || e.key === "s") movePlayer(0, 1);
+            if (e.key.includes("Left") || e.key === "a") movePlayer(-1, 0);
+            if (e.key.includes("Right") || e.key === "d") movePlayer(1, 0);
+        });
+
+        update();
+    </script>
+</body>
+</html>
